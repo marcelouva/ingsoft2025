@@ -3,10 +3,10 @@ package com.is1.proyecto.models;
 import org.javalite.activejdbc.Model;
 import org.javalite.activejdbc.annotations.Table;
 
-@Table("users") // Esta anotación asocia explícitamente el modelo 'User' con la tabla 'users' en la DB.
-public class User extends Model {
+@Table("accounts") // Esta anotación asocia explícitamente el modelo 'Account' con la tabla 'accounts' en la DB.
+public class Account extends Model {
 
-    // ActiveJDBC mapea automáticamente las columnas de la tabla 'users'
+    // ActiveJDBC mapea automáticamente las columnas de la tabla 'accounts'
     // (como 'id', 'name', 'password', etc.) a los atributos de esta clase.
     // No necesitas declarar los campos (id, name, password) aquí como variables de instancia,
     // ya que la clase Model base se encarga de la interacción con la base de datos.
@@ -30,10 +30,4 @@ public class User extends Model {
         set("password", password); // Establece el valor para la columna 'password'
     }
 
-    // Opcional: Métodos para validaciones, lógica de negocio específica de usuario, etc.
-    // Por ejemplo:
-    // public boolean isValidPassword(String inputPassword) {
-    //     // Aquí implementarías la lógica de verificación de contraseña hasheada
-    //     return get("password").equals(inputPassword); // Solo un ejemplo, NUNCA usar en producción con contraseñas en texto plano.
-    // }
 }
