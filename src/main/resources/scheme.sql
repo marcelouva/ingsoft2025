@@ -10,12 +10,7 @@ USE academica_db;
 -- Crea la tabla 'accounts'
 CREATE TABLE accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
-
--- Opcional: Inserta algunos datos de ejemplo (puedes borrar estas líneas si no los necesitas)
-INSERT INTO accounts (name, password) VALUES ('Alice', 'pass123');
-INSERT INTO accounts (name, password) VALUES ('Bob', 'securepwd');
-INSERT INTO accounts (name, password) VALUES ('Charlie', 'mysecret');
 

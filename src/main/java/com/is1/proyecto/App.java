@@ -106,9 +106,9 @@ public class App {
             // Si no hay un nombre de usuario en la sesión, la bandera es nula o falsa,
             // significa que el usuario no está logueado o su sesión expiró.
             if (currentUsername == null || loggedIn == null || !loggedIn) {
-                System.out.println("DEBUG: Acceso no autorizado a /dashboard. Redirigiendo a /login.");
+                System.out.println("DEBUG: Acceso no autorizado a /dashboard. Redirigiendo a /.");
                 // Redirige al login con un mensaje de error.
-                res.redirect("/login?error=Debes iniciar sesión para acceder a esta página.");
+                res.redirect("/?error=Debes iniciar sesión para acceder a esta página.");
                 return null; // Importante retornar null después de una redirección.
             }
 
@@ -129,7 +129,7 @@ public class App {
             System.out.println("DEBUG: Sesión cerrada. Redirigiendo a /login.");
 
             // Redirige al usuario a la página de login con un mensaje de éxito.
-            res.redirect("/login?message=Has cerrado sesión exitosamente.");
+            res.redirect("/");
 
             return null; // Importante retornar null después de una redirección.
         });
@@ -137,7 +137,7 @@ public class App {
         // GET: Muestra el formulario de inicio de sesión (login).
         // Nota: Esta ruta debería ser capaz de leer también mensajes de error/éxito de los query params
         // si se la usa como destino de redirecciones. (Tu código de /account/create ya lo hace, aplicar similar).
-        get("/login", (req, res) -> {
+        get("/", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             String errorMessage = req.queryParams("error");
             if (errorMessage != null && !errorMessage.isEmpty()) {
@@ -164,6 +164,13 @@ public class App {
             String name = req.queryParams("name");
             String password = req.queryParams("password");
 
+            Account ac1 = Account.findFirst("name = ?", name);
+            if(ac1!=null){
+                res.redirect("/account/create?error=Nombre de usuario existente.");
+                return ""; // Retorna una cadena vacía ya que la respuesta ya fue redirigida.
+            }
+
+
             // Validaciones básicas: campos no pueden ser nulos o vacíos.
             if (name == null || name.isEmpty() || password == null || password.isEmpty()) {
                 res.status(400); // Código de estado HTTP 400 (Bad Request).
@@ -171,6 +178,10 @@ public class App {
                 res.redirect("/account/create?error=Nombre y contraseña son requeridos.");
                 return ""; // Retorna una cadena vacía ya que la respuesta ya fue redirigida.
             }
+
+
+
+
 
             try {
                 // Intenta crear y guardar la nueva cuenta en la base de datos.
