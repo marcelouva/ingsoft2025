@@ -2,11 +2,11 @@
 
 Este documento explica cómo configurar y preparar la base de datos SQLite para el proyecto.
 
-## Paso a Paso: Configuración de la Base de Datos SQLite
+## Configuración de la Base de Datos SQLite
 
-Para que la aplicación funcione correctamente, es necesario tener la base de datos SQLite configurada con la estructura de tablas adecuada. Sigue estos pasos:
+Para que la aplicación funcione correctamente, es necesario tener la base de datos SQLite configurada con la estructura de tablas adecuada. 
 
-### 1. Instalación de SQLite (Herramienta de Línea de Comandos)
+### 1. Instalación de SQLite 
 
 Antes de ejecutar el script de la base de datos, asegúrate de tener la herramienta de línea de comandos de SQLite (`sqlite3`) instalada en tu sistema.
 
