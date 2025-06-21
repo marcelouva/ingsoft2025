@@ -1,21 +1,9 @@
--- Elimina la base de datos si ya existe para empezar desde cero
-DROP DATABASE IF EXISTS academica_db;
+-- Elimina la tabla 'accounts' si ya existe para asegurar un inicio limpio
+DROP TABLE IF EXISTS accounts;
 
--- Crea la base de datos students_db
-CREATE DATABASE academica_db;
-
--- Selecciona la base de datos students_db para trabajar en ella
-USE academica_db;
-
--- Crea la tabla 'accounts'
+-- Crea la tabla 'accounts' con los campos originales, adaptados para SQLite
 CREATE TABLE accounts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Clave primaria autoincremental para SQLite
+    name TEXT NOT NULL UNIQUE,          -- Nombre de usuario (TEXT es el tipo de cadena recomendado para SQLite), con restricción UNIQUE
+    password TEXT NOT NULL           -- Contraseña hasheada (TEXT es el tipo de cadena recomendado para SQLite)
 );
-
--- Opcional: Inserta algunos datos de ejemplo (puedes borrar estas líneas si no los necesitas)
-INSERT INTO accounts (name, password) VALUES ('Alice', 'pass123');
-INSERT INTO accounts (name, password) VALUES ('Bob', 'securepwd');
-INSERT INTO accounts (name, password) VALUES ('Charlie', 'mysecret');
-

@@ -1,10 +1,13 @@
 // Archivo: com/is1/proyecto/config/DBConfigSingleton.java
 package com.is1.proyecto.config;
 
+import org.javalite.activejdbc.Base; // Necesitarás esta importación para usar Base.open y Base.close
+
 public final class DBConfigSingleton {
 
     private static DBConfigSingleton instance;
 
+    // Ya no es necesario que sean final si los vas a configurar dinámicamente o mantener una sola instancia
     private final String dbUrl;
     private final String user;
     private final String pass;
@@ -12,12 +15,11 @@ public final class DBConfigSingleton {
 
     // Constructor privado para evitar instanciación directa
     private DBConfigSingleton() {
-        // Idealmente, estas credenciales deberían venir de un archivo de configuración,
-        // variables de entorno, o un servicio de secretos en producción.
-        this.driver = "com.mysql.cj.jdbc.Driver"; // Opcional, ActiveJDBC lo puede deducir
-        this.dbUrl = "jdbc:mysql://localhost:3306/academica_db";
-        this.user = "muva";
-        this.pass = "muva";
+        // Configuraciones para SQLite
+        this.driver = "org.sqlite.JDBC"; // Driver JDBC para SQLite
+        this.dbUrl = "jdbc:sqlite:./academica_bd_sqlite.db"; // URL de conexión para SQLite (creará/usará mi_proyecto.db en el directorio del proyecto)
+        this.user = ""; // SQLite no usa usuario
+        this.pass = ""; // SQLite no usa contraseña
     }
 
     public static synchronized DBConfigSingleton getInstance() {
@@ -27,6 +29,17 @@ public final class DBConfigSingleton {
         return instance;
     }
 
+    // Métodos para abrir y cerrar la conexión
+    public void openConnection() {
+        // Utiliza los valores de las propiedades de la clase para abrir la conexión
+        Base.open(this.driver, this.dbUrl, this.user, this.pass);
+    }
+
+    public void closeConnection() {
+        Base.close();
+    }
+
+    // Getters existentes
     public String getDbUrl() {
         return dbUrl;
     }
@@ -43,3 +56,4 @@ public final class DBConfigSingleton {
         return driver;
     }
 }
+
