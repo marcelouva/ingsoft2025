@@ -129,7 +129,7 @@ public class App {
             System.out.println("DEBUG: Sesión cerrada. Redirigiendo a /login.");
 
             // Redirige al usuario a la página de login con un mensaje de éxito.
-            res.redirect("/login?message=Has cerrado sesión exitosamente.");
+            res.redirect("/");
 
             return null; // Importante retornar null después de una redirección.
         });
@@ -137,7 +137,7 @@ public class App {
         // GET: Muestra el formulario de inicio de sesión (login).
         // Nota: Esta ruta debería ser capaz de leer también mensajes de error/éxito de los query params
         // si se la usa como destino de redirecciones. (Tu código de /account/create ya lo hace, aplicar similar).
-        get("/login", (req, res) -> {
+        get("/", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             String errorMessage = req.queryParams("error");
             if (errorMessage != null && !errorMessage.isEmpty()) {
