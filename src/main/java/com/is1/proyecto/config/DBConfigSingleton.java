@@ -17,7 +17,7 @@ public final class DBConfigSingleton {
     private DBConfigSingleton() {
         // Configuraciones para SQLite
         this.driver = "org.sqlite.JDBC"; // Driver JDBC para SQLite
-        this.dbUrl = "jdbc:sqlite:./academica_bd_sqlite.db"; // URL de conexión para SQLite (creará/usará mi_proyecto.db en el directorio del proyecto)
+        this.dbUrl = System.getProperty("db.url", "jdbc:sqlite:./db/dev.db");
         this.user = ""; // SQLite no usa usuario
         this.pass = ""; // SQLite no usa contraseña
     }
