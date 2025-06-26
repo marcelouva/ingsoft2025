@@ -3,10 +3,10 @@ package com.is1.proyecto.models;
 import org.javalite.activejdbc.Model;
 import org.javalite.activejdbc.annotations.Table;
 
-@Table("accounts") // Esta anotación asocia explícitamente el modelo 'Account' con la tabla 'accounts' en la DB.
-public class Account extends Model {
+@Table("users") // Esta anotación asocia explícitamente el modelo 'User' con la tabla 'users' en la DB.
+public class User extends Model {
 
-    // ActiveJDBC mapea automáticamente las columnas de la tabla 'accounts'
+    // ActiveJDBC mapea automáticamente las columnas de la tabla 'users'
     // (como 'id', 'name', 'password', etc.) a los atributos de esta clase.
     // No necesitas declarar los campos (id, name, password) aquí como variables de instancia,
     // ya que la clase Model base se encarga de la interacción con la base de datos.
