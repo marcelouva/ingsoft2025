@@ -161,8 +161,10 @@ public class App {
 
         // POST: Maneja el envío del formulario de creación de nueva cuenta.
         post("/user/new", (req, res) -> {
-            String name = req.queryParams("name");
+            String name = req.queryParams("username");
             String password = req.queryParams("password");
+            String email = req.queryParams("email");            
+            String active = req.queryParams("is_active");
 
             // Validaciones básicas: campos no pueden ser nulos o vacíos.
             if (name == null || name.isEmpty() || password == null || password.isEmpty()) {
@@ -178,7 +180,18 @@ public class App {
                 // Hashea la contraseña de forma segura antes de guardarla.
                 String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-                ac.set("name", name); // Asigna el nombre de usuario.
+                ac.set("email",email);
+                if (active.equals("true")){
+                    ac.set("is_active",true);
+
+                }else{
+                    ac.set("is_active",false);
+
+                }
+
+                ac.set("admin",false);
+
+                ac.set("username", name); // Asigna el nombre de usuario.
                 ac.set("password", hashedPassword); // Asigna la contraseña hasheada.
                 ac.saveIt(); // Guarda el nuevo usuario en la tabla 'users'.
 
@@ -214,7 +227,7 @@ public class App {
             }
 
             // Busca la cuenta en la base de datos por el nombre de usuario.
-            User ac = User.findFirst("name = ?", username);
+            User ac = User.findFirst("username = ?", username);
 
             // Si no se encuentra ninguna cuenta con ese nombre de usuario.
             if (ac == null) {
