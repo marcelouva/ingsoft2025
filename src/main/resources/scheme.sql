@@ -11,3 +11,13 @@ CREATE TABLE users (
     admin BOOLEAN DEFAULT 0,            -- Nuevo campo: rol de administrador, por defecto falso (0 para booleano en SQLite)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE people (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    dni TEXT UNIQUE NOT NULL, -- Nuevo campo DNI: TEXT, ÚNICO y NO NULO
+    birth_date TEXT,
+    user_id INTEGER UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+
+);
