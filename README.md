@@ -15,3 +15,44 @@ mvn clean install -P test
 
 Nota: al ejecutar los mvn clena install ... y al intentar accede a la base de dato, por ej. cuando se intenta crear una cuenta de usuario, el archivo se crea solo. Pero luego se debe crear la estructura de tablas que esté disponible en el scheme.sql, esto se realiza ejecutando 
 sqlite3 dev.db < .../scheme.sql
+__________
+
+Guía técnica: ejecutar y desarrollar una app Java en Docker
+
+## Requisitos
+
+* Tener Docker instalado
+* Clonar este repositorio
+
+## 1. Construir la imagen Docker
+
+
+docker build -t miapp-dev .
+
+Esto crea una imagen con todo lo necesario para compilar, testear y ejecutar el proyecto sin instalar herramientas adicionales.
+
+## 2. Ingresar al entorno de desarrollo
+
+
+docker run -it --rm -v ${PWD}:/app -w /app -p 8080:8080 miapp-dev ./watch.sh
+
+Este comando abre una terminal dentro del contenedor con Maven y Java configurados. Desde allí podés ejecutar:
+
+mvn compile                         # Compilar el código
+mvn exec:java -Dexec.mainClass="com.ejemplo.Main"   # Ejecutar la app (reemplazar con tu clase principal)
+mvn test                            # Ejecutar los tests
+
+**Nota:**
+
+* En PowerShell, `${PWD}` funciona correctamente.
+* En Git Bash o Linux/Mac, usá `$(pwd)` en lugar de `${PWD}`.
+
+## 3. Acceder a la aplicación desde el navegador
+
+
+docker run -it --rm -v ${PWD}:/app -w /app -p 8080:8080 miapp-dev
+
+Esto permite acceder a la aplicación desde el navegador en:
+
+http://localhost:8080
+

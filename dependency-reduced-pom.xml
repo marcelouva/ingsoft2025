@@ -56,15 +56,34 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
-        <configuration>
-          <mainClass>com.is1.proyecto.App</mainClass>
-          <systemProperties>
-            <systemProperty>
-              <key>db.url</key>
-              <value>${db.url}</value>
-            </systemProperty>
-          </systemProperties>
-        </configuration>
+        <executions>
+          <execution>
+            <id>initialize-db</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.is1.proyecto.config.DBInitializer</mainClass>
+              <cleanupDaemonThreads>false</cleanupDaemonThreads>
+            </configuration>
+          </execution>
+          <execution>
+            <id>run-app</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.is1.proyecto.App</mainClass>
+              <systemProperties>
+                <systemProperty>
+                  <key>db.url</key>
+                  <value>${db.url}</value>
+                </systemProperty>
+              </systemProperties>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
