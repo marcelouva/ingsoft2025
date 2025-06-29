@@ -149,18 +149,69 @@ public class App {
 get("/person", (req, res) -> {
     Object userId = req.session().attribute("userId");
     Map<String, Object> model = new HashMap<>();
+    String successMessage = req.queryParams("message");
+    if (successMessage != null && !successMessage.isEmpty()) {
+                model.put("successMessage", successMessage);
+    }
+    String errorMessage = req.queryParams("error");
+    if (errorMessage != null && !errorMessage.isEmpty()) {
+                model.put("errorMessage", errorMessage);
+    }
+    return new ModelAndView(model, "person.mustache");
+}, new MustacheTemplateEngine());
 
-    if (userId != null) {
+
+post("/person/new", (req, res) -> {
+    Object userId = req.session().attribute("userId");
+    
+    String name = req.queryParams("name");
+    String dni = req.queryParams("dni");
+    String birt_date = req.queryParams("birt_date");
+
+    if (name == null || name.isEmpty() || dni == null || dni.isEmpty()) {
+                res.status(400);
+                res.redirect("/person?error=Falta tu nombre o DNI.");
+                return " ";
+    }
+    try {// si los datos están ok creamos la Person y la vinculamos con el User
+                Person p = new Person();
+                p.set("name", name);
+                p.set("dni", dni);
+                p.set("birt_date", birt_date);
+ 
+                p.set("user_id",userId);
+                p.saveIt();
+
+                res.status(201);
+                res.redirect("/person?message=Datos registrados exitosamente." + name + "!");
+                return "";
+       } catch (Exception e) {
+                System.err.println("Error al registrar el perfil de la cuenta: " + e.getMessage());
+                e.printStackTrace();
+                res.status(500);
+                res.redirect("/person?error=Error al registrar los datos.");
+                return "";
+         }
+    });
+
+
+
+
+
+
+
+
+  /**    if (userId != null) {
         Person person = Person.findFirst("user_id = ?", userId);
         if (person != null) {
             model.put("person", person.toMap()); // convierte los campos a map
             model.put("id", person.getId());     // para el botón Editar
         }
     }
-
+  
     return new ModelAndView(model, "person.mustache");
 }, new MustacheTemplateEngine());
-
+*/
 
 
 
