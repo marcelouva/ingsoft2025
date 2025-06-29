@@ -13,17 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.is1.proyecto.config.DBConfigSingleton;
+import com.is1.proyecto.models.Person;
 import com.is1.proyecto.models.User;
-
-// --- YA NO NECESARIAS AQUÍ SI LA INICIALIZACIÓN SE MUEVE A DBInitializer ---
-// import java.io.IOException;
-// import java.io.InputStream;
-// import java.nio.charset.StandardCharsets;
-// import java.sql.Connection;
-// import java.sql.SQLException;
-// import java.sql.Statement;
-// import java.util.Scanner;
-// --- FIN DE IMPORTACIONES ELIMINADAS ---
 
 
 /**
@@ -136,7 +127,7 @@ public class App {
                 User ac = new User();
                 String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-                ac.set("name", name);
+                ac.set("username", name);
                 ac.set("password", hashedPassword);
                 ac.saveIt();
 
@@ -154,6 +145,34 @@ public class App {
         });
 
 
+
+get("/person", (req, res) -> {
+    Object userId = req.session().attribute("userId");
+    Map<String, Object> model = new HashMap<>();
+
+    if (userId != null) {
+        Person person = Person.findFirst("user_id = ?", userId);
+        if (person != null) {
+            model.put("person", person.toMap()); // convierte los campos a map
+            model.put("id", person.getId());     // para el botón Editar
+        }
+    }
+
+    return new ModelAndView(model, "person.mustache");
+}, new MustacheTemplateEngine());
+
+
+
+
+
+
+
+
+
+
+
+
+
         post("/login", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
 
@@ -166,7 +185,7 @@ public class App {
                 return new ModelAndView(model, "login.mustache");
             }
 
-            User ac = User.findFirst("name = ?", username);
+            User ac = User.findFirst("username = ?", username);
 
             if (ac == null) {
                 res.status(401);
@@ -231,6 +250,5 @@ public class App {
 
     } // Cierre del método main
 
-    // --- ELIMINADO: initializeDatabaseSchema() y lógica de inicialización ya no están aquí ---
 
 } // Cierre de la clase App

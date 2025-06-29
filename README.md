@@ -56,3 +56,12 @@ Esto permite acceder a la aplicación desde el navegador en:
 
 http://localhost:8080
 
+============================
+Pasos para agregar relacion 1 a 1
+
+Voy a agregar la relación 1 a 1 entre los modelos User y Person. Un usuario está relacionado con una persona por el campo id de usuario. 
+
+1) En scheme.sql  debemos incluir la tabla people, donde esta tabla tiene una clave foránea user_id enlazada con id de users.  
+
+2) Creamos el modelo Person.
+
