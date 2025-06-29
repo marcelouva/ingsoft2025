@@ -5,15 +5,12 @@ import org.javalite.activejdbc.annotations.Table;
 
 @Table("users") // Esta anotación asocia explícitamente el modelo 'User' con la tabla 'users' en la DB.
 public class User extends Model {
+   
+    public Person getPerson() {
+        return parent(Person.class);
+    }
 
-    // ActiveJDBC mapea automáticamente las columnas de la tabla 'users'
-    // (como 'id', 'name', 'password', etc.) a los atributos de esta clase.
-    // No necesitas declarar los campos (id, name, password) aquí como variables de instancia,
-    // ya que la clase Model base se encarga de la interacción con la base de datos.
-
-    // Opcional: Puedes agregar métodos getters y setters si prefieres un acceso más tipado,
-    // aunque los métodos genéricos de Model (getString(), set(), getInteger(), etc.) ya funcionan.
-
+   
     public String getName() {
         return getString("name"); // Obtiene el valor de la columna 'name'
     }

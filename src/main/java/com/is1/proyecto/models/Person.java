@@ -5,7 +5,9 @@ import org.javalite.activejdbc.annotations.Table;
 
 @Table("people")
 public class Person extends Model {
+   
 
+   
     // Define la relación inversa: una persona pertenece a un usuario.
     // ActiveJDBC usará el campo 'user_id' para encontrar el usuario relacionado.
     public User getUser() {

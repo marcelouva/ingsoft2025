@@ -22,3 +22,23 @@ CREATE TABLE people (
 
 );
 
+CREATE TABLE subjects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE people_subjects (
+    person_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (person_id, subject_id),
+    FOREIGN KEY (person_id) REFERENCES people(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+
+
+
+
+

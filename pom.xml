@@ -24,9 +24,15 @@
     <slf4j.version>1.7.36</slf4j.version>
     <junit.version>4.13.2</junit.version>
     <junit.jupiter.version>5.10.0</junit.jupiter.version>
-    <activejdbc.version>3.4-j11</activejdbc.version>
+    <activejdbc.version>3.5-j11</activejdbc.version>
     <db.url>jdbc:sqlite:./db/dev.db</db.url>
   </properties>
+
+
+
+
+
+
 
   <dependencies>
     <dependency>
