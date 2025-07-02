@@ -169,10 +169,10 @@ public class App {
         });
 
         // Ruta GET para mostrar el formulario de registro de datos personales (Person).
-        get("/person", (req, res) -> {
-            Object userId = req.session().attribute("userId"); // Obtiene el ID de usuario de la sesión.
+         get("/person", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
-            // Manejo de mensajes de éxito y error.
+
+            // --- Manejo de mensajes de éxito y error (mantener) ---
             String successMessage = req.queryParams("message");
             if (successMessage != null && !successMessage.isEmpty()) {
                 model.put("successMessage", successMessage);
@@ -181,46 +181,129 @@ public class App {
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 model.put("errorMessage", errorMessage);
             }
-            // Retorna la vista "person.mustache" con el modelo.
+            // --- Fin manejo de mensajes ---
+
+            // --- Lógica para precargar los datos de la Persona del usuario ---
+            Object userId = req.session().attribute("userId");
+
+            if (userId == null) {
+                // Si no hay userId en la sesión, el usuario no está logueado o la sesión expiró.
+                res.status(401); // Unauthorized
+                model.put("errorMessage", "Debe iniciar sesión para acceder.");
+                return new ModelAndView(model, "login.mustache");
+            }
+
+            // Aquí asumo que 'User.findFirst("id = ?", userId)' es un método válido para tu ORM
+            // y que 'User' tiene un método 'getPerson()' que devuelve un objeto 'Person'.
+            User us = User.findFirst("id = ?", userId);
+
+            if (us != null) {
+               Person p = us.getPerson(); // Obtiene la persona asociada al usuario
+
+                if (p != null) {
+
+                    // Si ya existe la info de persona asociada al usuario
+                    model.put("person", p); // Pasa el objeto 'Person' al modelo
+                    model.put("isEditing", true); // Indica que se están editando datos existentes
+                    model.put("formTitle", "Modificar mis Datos Personales"); // Título para edición
+                } else {
+                    // El usuario existe, pero no tiene datos de Persona aún
+                    model.put("isEditing", false); // Indica que es un nuevo registro
+                    model.put("formTitle", "Completar mis Datos Personales"); // Título para nuevo registro
+                }
+            } else {
+                // Esto podría indicar un problema si el userId está en sesión pero el User no se encuentra
+                res.status(404); // Not Found o algún otro error apropiado
+                model.put("errorMessage", "Error: Usuario no encontrado para el ID de sesión.");
+                return new ModelAndView(model, "error.mustache"); // Redirigir a una página de error o login
+            }
+            // --- Fin lógica de precarga ---
+
             return new ModelAndView(model, "person.mustache");
         }, new MustacheTemplateEngine());
 
+       
 
-        // Ruta POST para procesar el envío del formulario de creación de datos personales (Person).
-        post("/person/new", (req, res) -> {
-            Object userId = req.session().attribute("userId"); // Obtiene el ID de usuario de la sesión para vincular la persona.
 
-            String name = req.queryParams("name"); // Nombre de la persona.
-            String dni = req.queryParams("dni"); // DNI de la persona.
-            String birth_date = req.queryParams("birth_date"); // Fecha de nacimiento de la persona.
+       post("/person/new", (req, res) -> {
+            Object userId = req.session().attribute("userId");
 
-            // Valida que el nombre y DNI no estén vacíos.
+            // --- Nuevos campos para manejar la edición ---
+            String personIdParam = req.queryParams("id"); // Obtiene el ID de la persona si está editando
+            boolean isEditing = (personIdParam != null && !personIdParam.isEmpty());
+            // --- Fin nuevos campos ---
+
+            String name = req.queryParams("name");
+            String dni = req.queryParams("dni");
+            String birth_date = req.queryParams("birth_date");
+
             if (name == null || name.isEmpty() || dni == null || dni.isEmpty()) {
-                res.status(400); // Bad Request.
-                res.redirect("/person?error=Falta tu nombre o DNI."); // Redirige con mensaje de error.
-                return " ";
+                res.status(400);
+                res.redirect("/person?error=Falta tu nombre o DNI.");
+                return "";
             }
-            try { // Si los datos están ok, creamos la Person y la vinculamos con el User
-                Person p = new Person();
-                p.set("name", name); // Establece el nombre.
-                p.set("dni", dni); // Establece el DNI.
-                p.set("birth_date", birth_date); // Establece la fecha de nacimiento.
 
-                p.set("user_id", userId); // Vincula esta persona con el ID de usuario de la sesión.
-                p.saveIt(); // Guarda los datos de la persona en la base de datos.
+            try {
+                Person p;
+                if (isEditing) {
+                    // Si estamos editando, cargamos la persona existente por su ID
+                    p = Person.findById(Long.parseLong(personIdParam));
+                    if (p == null) {
+                        res.status(404); // Not Found si no se encuentra la persona
+                        res.redirect("/person?error=Persona no encontrada para actualizar.");
+                        return "";
+                    }
+                    // Opcional: Asegurarse de que el usuario actual es dueño de esta persona
+                    // Esto es crucial para seguridad en un entorno real
+                    if (!p.get("user_id").equals(userId)) {
+                        res.status(403); // Forbidden
+                        res.redirect("/dashboard?error=Acceso denegado.");
+                        return "";
+                    }
 
-                res.status(201); // Created.
-                res.redirect("/person?message=Datos registrados exitosamente." + name + "!"); // Redirige con mensaje de éxito.
+                } else {
+                    // Si NO estamos editando, creamos una nueva instancia de Persona
+                    p = new Person();
+                    // IMPORTANTE: Asegúrate de que no haya ya una persona vinculada a este userId
+                    // Dado que user_id es UNIQUE, si ya existe una persona para este userId,
+                    // saveIt() lanzará una excepción (violación de unicidad).
+                    // Esto es lo que queremos para un 1:1.
+                    p.set("user_id", userId); // Vincula la nueva persona con el ID de usuario.
+                }
+
+                p.set("name", name);
+                p.set("dni", dni);
+                p.set("birth_date", birth_date);
+
+                p.saveIt(); // Guarda (inserta o actualiza) los datos.
+
+                res.status(201); // O 200 OK si es una actualización
+                String message = isEditing ? "Datos actualizados exitosamente." : "Datos registrados exitosamente.";
+                res.redirect("/person?message=" + message + " " + name + "!");
+                return "";
+            } catch (NumberFormatException e) {
+                res.status(400); // Bad Request si el ID no es un número válido
+                res.redirect("/person?error=ID de persona inválido.");
                 return "";
             } catch (Exception e) {
-                // Manejo de errores en caso de fallo al registrar el perfil de la persona.
-                System.err.println("Error al registrar el perfil de la cuenta: " + e.getMessage());
+                System.err.println("Error al procesar el perfil de la cuenta: " + e.getMessage());
                 e.printStackTrace();
-                res.status(500); // Internal Server Error.
-                res.redirect("/person?error=Error al registrar los datos."); // Redirige con mensaje de error genérico.
+                res.status(500);
+                res.redirect("/person?error=Error al procesar los datos.");
                 return "";
             }
         });
+
+
+
+
+
+
+
+
+
+
+
 
         // Ruta POST para manejar el inicio de sesión.
         post("/login", (req, res) -> {

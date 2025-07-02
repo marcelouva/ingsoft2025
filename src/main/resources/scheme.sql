@@ -22,6 +22,21 @@ CREATE TABLE people (
 
 );
 
+
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY, -- La clave primaria será también clave foránea a people.id
+    student_code TEXT UNIQUE NOT NULL,
+    FOREIGN KEY (id) REFERENCES people(id) -- Referencia a la persona base
+);
+
+CREATE TABLE IF NOT EXISTS professors (
+    id INTEGER PRIMARY KEY, -- La clave primaria será también clave foránea a people.id
+    admission_year INTEGER NOT NULL,
+    FOREIGN KEY (id) REFERENCES people(id) -- Referencia a la persona base
+);
+
+
+
 CREATE TABLE subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT NOT NULL UNIQUE,
