@@ -8,7 +8,7 @@ CREATE TABLE users (
     password TEXT NOT NULL,        -- Contraseña hasheada
     email TEXT UNIQUE,                  -- Opcional: correo electrónico del usuario
     is_active BOOLEAN DEFAULT 1,        -- Opcional: para habilitar/deshabilitar cuentas
-    admin BOOLEAN DEFAULT 0,            -- Nuevo campo: rol de administrador, por defecto falso (0 para booleano en SQLite)
+    rol INTEGER NOT NULL DEFAULT 0,            -- : rol 0 estudiante - 1 profesor  - 2 administrador
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -19,9 +19,7 @@ CREATE TABLE people (
     birth_date TEXT,
     user_id INTEGER UNIQUE, 
     FOREIGN KEY (user_id) REFERENCES users(id)
-
 );
-
 
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY, -- La clave primaria será también clave foránea a people.id

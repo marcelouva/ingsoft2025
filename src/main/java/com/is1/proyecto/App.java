@@ -137,6 +137,7 @@ public class App {
         post("/user/new", (req, res) -> {
             String name = req.queryParams("name"); // Obtiene el nombre de usuario del formulario.
             String password = req.queryParams("password"); // Obtiene la contraseña del formulario.
+            String rol = req.queryParams("rol"); // Obtiene la contraseña del formulario.
 
             // Valida que el nombre y la contraseña no estén vacíos.
             if (name == null || name.isEmpty() || password == null || password.isEmpty()) {
@@ -152,6 +153,7 @@ public class App {
 
                 ac.set("username", name); // Establece el nombre de usuario.
                 ac.set("password", hashedPassword); // Establece la contraseña hasheada.
+                ac.set("rol",rol);
                 ac.saveIt(); // Guarda el nuevo usuario en la base de datos.
 
                 res.status(201); // Created.
