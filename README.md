@@ -79,5 +79,7 @@ En el branch rel_muchos_a_muchos vamos a cambiar la relación entre User  y  Sub
         * |cursa
         Subject  
 
-  En este caso se agrega la tabla para hacer la unión a la base de datos, y en los modelos User y Subject se agrega la notación @Many2Many      
+  En este caso se agrega la tabla para hacer la unión a la base de datos, y en los modelos User y Subject se agrega la notación @Many2Many  
+  Se agrega un endoint a App.java que crea un usuario y lo asocia a un materia
+  curl -X POST http://localhost:8080/crearRelacionUvaMate    
         
