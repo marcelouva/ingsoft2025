@@ -4,20 +4,17 @@ import java.util.List;
 
 import org.javalite.activejdbc.Model;
 import org.javalite.activejdbc.annotations.Table;
+import org.javalite.activejdbc.annotations.Many2Many; // ¡Asegúrate de importar esta anotación!
 
 @Table("users")
+@Many2Many(other = Subject.class, join = "users_subjects", sourceFKName = "user_id", targetFKName = "subject_id") // Línea clave actualizada
 public class User extends Model {
 
     public Person getPerson() {
-        // Opción 1: Usar findFirst en Person para buscar por user_id
-        // El 'id' de este User es la clave foránea 'user_id' en la tabla 'people'.
         return Person.findFirst("user_id = ?", this.getId());
     }
 
-    // Método para asociar una Person a este User
     public void setPerson(Person person) {
-        // Cuando haces add(person), ActiveJDBC asignará el id de este User
-        // al campo 'user_id' de 'person' internamente.
         this.add(person);
     }
 
@@ -37,20 +34,19 @@ public class User extends Model {
         set("password", password);
     }
 
-
-
+    // Este método es para obtener todas las materias asociadas a este usuario
     public List<Subject> getSubjects() {
         return getAll(Subject.class);
     }
 
-    // Opcionalmente, un método para añadir una materia a este usuario
+    // Este método es para asociar una materia a este usuario
+    // ActiveJDBC usará la tabla de unión "users_subjects" automáticamente
     public void addSubject(Subject subject) {
-        add(subject); // ActiveJDBC automáticamente establecerá el user_id en la materia
+        this.add(subject);
     }
 
-
-
-
-
-
+    // Opcional: Método para desasociar una materia de este usuario
+    public void removeSubject(Subject subject) {
+        this.remove(subject);
+    }
 }

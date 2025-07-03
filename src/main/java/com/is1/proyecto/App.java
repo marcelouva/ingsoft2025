@@ -397,6 +397,36 @@ public class App {
 
 
 
+    post("/crearRelacionUvaMate", (req, res) -> {
+        // 1. Crear el usuario "uva111"
+        User userUva = new User();
+        userUva.set("username", "uva111"); // Nombre de usuario específico
+        userUva.set("email", "uva111_" + System.currentTimeMillis() + "@example.com"); // Email único
+        userUva.set("password", BCrypt.hashpw("passwordUva123", BCrypt.gensalt())); // Contraseña hasheada
+        userUva.set("rol", 0); // Ejemplo: rol de estudiante
+        userUva.saveIt(); // Guarda el usuario para obtener su ID
+
+        // 2. Crear la materia "Mate1"
+        Subject subjectMate1 = new Subject();
+        subjectMate1.set("code", "MATE1"); // Código específico para la materia
+        subjectMate1.set("name", "Mate1"); // Nombre de la materia específico
+        subjectMate1.set("description", "Matemáticas Nivel 1: Fundamentos.");
+        subjectMate1.saveIt(); // Guarda la materia para obtener su ID
+
+        // 3. Establecer la relación entre "uva111" y "Mate1"
+        // ActiveJDBC se encargará de insertar la entrada en la tabla 'users_subjects'
+        userUva.addSubject(subjectMate1);
+
+        return "OK: Usuario 'uva111', materia 'Mate1' creados y relacionados exitosamente.";
+    });
+
+
+
+
+
+
+
+
 
 
     } // Cierre del método main

@@ -28,11 +28,17 @@ CREATE TABLE subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    description TEXT,
-    user_id INTEGER, -- Nueva columna para la clave foránea
-    FOREIGN KEY (user_id) REFERENCES users(id) -- Definición de la clave foránea;
+    description TEXT
 );
 
 
+-- Tabla de unión para la relación muchos a muchos entre usuarios y materias
+CREATE TABLE users_subjects (
+    user_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (user_id, subject_id), -- Clave primaria compuesta para asegurar unicidad
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
 
 

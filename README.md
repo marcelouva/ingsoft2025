@@ -68,5 +68,16 @@ Voy a agregar la relación 1 a 1 entre los modelos User y Person. Un usuario est
 *************************************
 
 Agrego a esta versión endopoint /ppp que da de alta a un usuario vinculado con materias
- 
+En esta versión se agregaro una relacion uno a muchos entre User ------- Subject
+=====
+En el branch rel_muchos_a_muchos vamos a cambiar la relación entre User  y  Subject
+ muchos a muchos
+              1         1
+        User ------------ Person
+       *  |
+          |
+        * |cursa
+        Subject  
 
+  En este caso se agrega la tabla para hacer la unión a la base de datos, y en los modelos User y Subject se agrega la notación @Many2Many      
+        
