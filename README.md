@@ -65,3 +65,8 @@ Voy a agregar la relación 1 a 1 entre los modelos User y Person. Un usuario est
 
 2) Creamos el modelo Person.
 
+*************************************
+
+Agrego a esta versión endopoint /ppp que da de alta a un usuario vinculado con materias
+ 
+

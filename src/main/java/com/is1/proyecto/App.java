@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper; // Para serializar/deseriali
 import static spark.Spark.*; // Importa los métodos estáticos de Spark para definir rutas y configuraciones.
 
 import org.javalite.activejdbc.Base; // Para la conexión y operaciones con la base de datos usando ActiveJDBC.
+import org.javalite.activejdbc.DB;
 import org.mindrot.jbcrypt.BCrypt; // Para el hashing de contraseñas de forma segura.
 
 import spark.ModelAndView; // Para renderizar plantillas con un modelo de datos.
@@ -13,8 +14,11 @@ import spark.template.mustache.MustacheTemplateEngine; // Motor de plantillas Mu
 import java.util.HashMap; // Para crear mapas de datos que se pasan a las plantillas.
 import java.util.Map; // Interfaz Map.
 
+import javax.management.relation.Role;
+
 import com.is1.proyecto.config.DBConfigSingleton; // Configuración Singleton para la base de datos.
 import com.is1.proyecto.models.Person; // Modelo de datos para la entidad Persona.
+import com.is1.proyecto.models.Subject;
 import com.is1.proyecto.models.User; // Modelo de datos para la entidad Usuario.
 
 
@@ -108,6 +112,11 @@ public class App {
             res.redirect("/"); // Redirige a la página de inicio (login).
             return null;
         });
+
+
+
+
+
 
         // Ruta para la página de inicio, que es el formulario de login.
         get("/", (req, res) -> {
@@ -297,7 +306,7 @@ public class App {
         });
 
 
-
+   
 
 
 
@@ -355,6 +364,39 @@ public class App {
                 return new ModelAndView(model, "login.mustache"); // Retorna la vista de login con mensaje de error.
             }
         }, new MustacheTemplateEngine());
+
+
+
+     // curl -X POST http://localhost:8080/ppp
+       post("/ppp", (req, res) -> {
+        User newUser = new User();
+        newUser.set("username", "marcos" + System.currentTimeMillis()); // Nombre de usuario único
+        newUser.set("email", "zxczc" + System.currentTimeMillis() + "@example.com"); // Email único
+        newUser.set("password", BCrypt.hashpw("111", BCrypt.gensalt())); // Contraseña hasheada
+        newUser.set("rol", "0"); // Ejemplo: rol de profesor
+        newUser.saveIt(); // Guarda el usuario primero para que tenga un ID
+
+        // Ahora que newUser tiene un ID, podemos asociar el Subject
+        Subject subject2 = new Subject();
+        subject2.set("code", "ING102_" + System.currentTimeMillis()); // Código único para la materia
+        subject2.set("name", "Introducción a la Ingeniería 2");
+        subject2.set("description", "Conceptos fundamentales de la ingeniería.");
+        // ActiveJDBC manejará la asignación de user_id a través de addSubject
+        newUser.addSubject(subject2); // Esto guardará subject2 y establecerá user_id
+
+
+        Subject subject3 = new Subject();
+        subject3.set("code", "3309");
+        subject3.set("name", "Matemática 2");
+        subject3.set("description", "nn");
+        newUser.addSubject(subject3); // Esto guardará subject2 y establecerá user_id
+
+
+        return "OK";
+    });
+
+
+
 
 
     } // Cierre del método main

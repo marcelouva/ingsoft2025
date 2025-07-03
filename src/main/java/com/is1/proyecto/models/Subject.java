@@ -4,6 +4,7 @@ import org.javalite.activejdbc.Model;
 import org.javalite.activejdbc.annotations.Table;
 
 @Table("subjects")
+
 public class Subject extends Model {
 
     public String getCode() {

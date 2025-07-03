@@ -1,5 +1,7 @@
 package com.is1.proyecto.models;
 
+import java.util.List;
+
 import org.javalite.activejdbc.Model;
 import org.javalite.activejdbc.annotations.Table;
 
@@ -34,4 +36,21 @@ public class User extends Model {
     public void setPassword(String password) {
         set("password", password);
     }
+
+
+
+    public List<Subject> getSubjects() {
+        return getAll(Subject.class);
+    }
+
+    // Opcionalmente, un método para añadir una materia a este usuario
+    public void addSubject(Subject subject) {
+        add(subject); // ActiveJDBC automáticamente establecerá el user_id en la materia
+    }
+
+
+
+
+
+
 }
