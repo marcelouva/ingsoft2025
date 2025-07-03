@@ -1,233 +1,161 @@
 package com.is1.proyecto;
 
-import static spark.Spark.*; // Importa los métodos estáticos de Spark para definir rutas y configuraciones.
+import static spark.Spark.*;
 
-import org.javalite.activejdbc.Base; // Para la conexión y operaciones con la base de datos usando ActiveJDBC.
-import org.mindrot.jbcrypt.BCrypt; // Para el hashing de contraseñas de forma segura.
+import org.javalite.activejdbc.Base;
+import org.mindrot.jbcrypt.BCrypt;
 
-import spark.ModelAndView; // Para renderizar plantillas con un modelo de datos.
-import spark.template.mustache.MustacheTemplateEngine; // Motor de plantillas Mustache para la interfaz de usuario.
+import spark.ModelAndView;
+import spark.template.mustache.MustacheTemplateEngine;
 
-import java.util.HashMap; // Para crear mapas de datos que se pasan a las plantillas.
-import java.util.Map; // Interfaz Map.
+import java.util.HashMap;
+import java.util.Map;
 
-import com.is1.proyecto.config.DBConfigSingleton; // Configuración Singleton para la base de datos.
-import com.is1.proyecto.models.User; // Modelo de datos para la entidad Usuario.
+import com.is1.proyecto.config.DBConfigSingleton;
+import com.is1.proyecto.models.User;
 
-
+// ─── APLICACIÓN PRINCIPAL ─────────────────────────────────────────────────────
 public class App {
-    public static void main(String[] args) {
-        port(8080); // Configura el puerto en el que la aplicación Spark escuchará las peticiones HTTP (puerto 8080).
 
-        // Obtiene la instancia única de la configuración de la base de datos.
+    public static void main(String[] args) {
+
+        // ── Configuración del puerto ──────────────────────────────────────────
+        port(8080);
+
+        // ── Singleton de configuración de base de datos ──────────────────────
         DBConfigSingleton dbConfig = DBConfigSingleton.getInstance();
 
-        // --- Filtros de Request (before y after) ---
-        // Este filtro se ejecuta ANTES de que cualquier ruta sea procesada.
-        // Se encarga de abrir una conexión a la base de datos para cada petición HTTP.
+        // ── Filtro BEFORE: abre conexión BD por petición ──────────────────────
         before((req, res) -> {
             try {
-                // Abre una conexión a la base de datos utilizando las credenciales obtenidas del singleton.
-                Base.open(dbConfig.getDriver(), dbConfig.getDbUrl(), dbConfig.getUser(), dbConfig.getPass());
+                Base.open(
+                    dbConfig.getDriver(),
+                    dbConfig.getDbUrl(),
+                    dbConfig.getUser(),
+                    dbConfig.getPass()
+                );
             } catch (Exception e) {
-                // En caso de error al abrir la conexión, registra el error y detiene la petición con un estado 500.
-                System.err.println("Error al abrir conexión con ActiveJDBC: " + e.getMessage());
-                e.printStackTrace(); // Imprimir el stack trace para depuración.
-                halt(500, "{\"error\": \"Error interno del servidor: Fallo al conectar a la base de datos.\"}" + e.getMessage());
+                System.err.println("Error al abrir conexión: " + e.getMessage());
+                halt(500,
+                    "{\"error\": \"Error interno: fallo al conectar a la BD.\"}"
+                );
             }
         });
 
-        // Este filtro se ejecuta DESPUÉS de que cualquier ruta haya sido procesada.
-        // Se encarga de cerrar la conexión a la base de datos después de cada petición.
+        // ── Filtro AFTER: cierra conexión BD ─────────────────────────────────
         after((req, res) -> {
             try {
-                Base.close(); // Cierra la conexión de la base de datos.
+                Base.close();
             } catch (Exception e) {
-                // Registra cualquier error que ocurra al cerrar la conexión.
-                System.err.println("Error al cerrar conexión con ActiveJDBC: " + e.getMessage());
+                System.err.println("Error al cerrar conexión: " + e.getMessage());
             }
         });
 
-
-        // --- Rutas GET para renderizar formularios y páginas HTML ---
-
-        // Ruta para mostrar el formulario de creación de usuario.
+        // ── GET /user/new : muestra formulario de alta de usuario ────────────
         get("/user/new", (req, res) -> {
-            System.out.println(">>   get /user/new");
+            System.out.println(">> GET /user/new");
             Map<String, Object> model = new HashMap<>();
-            // Verifica si hay un mensaje de éxito en los parámetros de la URL y lo añade al modelo.
-            String successMessage = req.queryParams("message");
-            if (successMessage != null && !successMessage.isEmpty()) {
-                model.put("successMessage", successMessage);
-            }
-            // Verifica si hay un mensaje de error en los parámetros de la URL y lo añade al modelo.
-            String errorMessage = req.queryParams("error");
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                model.put("errorMessage", errorMessage);
-            }
-            // Retorna la vista "user_form.mustache" con el modelo.
             return new ModelAndView(model, "user_form.mustache");
         }, new MustacheTemplateEngine());
 
-
-        // Ruta para cerrar la sesión del usuario.
+        // ── GET /logout : cierra sesión y muestra mensaje ────────────────────
         get("/logout", (req, res) -> {
-            System.out.println(">> get   /logout");
-            req.session().invalidate(); // Invalida la sesión actual, eliminando todos sus atributos.
-            System.out.println("DEBUG: Sesión cerrada. Redirigiendo a /login.");
-            res.redirect("/"); // Redirige a la página de inicio (login).
-            return null;
-        });
-
-
-
-
-
-
-        // Ruta para la página de inicio, que es el formulario de login.
-        get("/", (req, res) -> {
-            System.out.println(">>   get /");
+            System.out.println(">> GET /logout");
             Map<String, Object> model = new HashMap<>();
-            // Manejo de mensajes de error y éxito pasados como parámetros de la URL.
-            String errorMessage = req.queryParams("error");
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                model.put("errorMessage", errorMessage);
-            }
-            String successMessage = req.queryParams("message");
-            if (successMessage != null && !successMessage.isEmpty()) {
-                model.put("successMessage", successMessage);
-            }
-            // Retorna la vista "login.mustache" con el modelo.
+            req.session().invalidate();
+            model.put("successMessage", "Usuario deslogeado!!.");
+            model.put("returnUrl", "/");
+            return new ModelAndView(model, "message.mustache");
+        }, new MustacheTemplateEngine());
+
+        // ── GET / : login por defecto ────────────────────────────────────────
+        get("/", (req, res) -> {
+            System.out.println(">> GET /");
+            Map<String, Object> model = new HashMap<>();
             return new ModelAndView(model, "login.mustache");
         }, new MustacheTemplateEngine());
 
-        // Ruta alternativa para mostrar el formulario de creación de usuario (redirecciona a /user/create).
-        get("/user/new", (req, res) -> {
-        System.out.println(">>   get /user/new");
-
-
-            return new ModelAndView(new HashMap<>(), "user_form.mustache");
-        }, new MustacheTemplateEngine());
-
-
-        // --- Rutas POST para manejar envíos de formularios y APIs ---
-
-
-
-
-
-
-
-  post("/user/new", (req, res) -> {
-            System.out.println(">>   post /user/new");
+        // ── POST /user/new : procesa alta de usuario ─────────────────────────
+        post("/user/new", (req, res) -> {
+            System.out.println(">> POST /user/new");
 
             Map<String, Object> model = new HashMap<>();
-            String name = req.queryParams("name"); // Obtiene el nombre de usuario del formulario.
-            String password = req.queryParams("password"); // Obtiene la contraseña del formulario.
+            String name     = req.queryParams("name");
+            String password = req.queryParams("password");
 
-            // Valida que el nombre y la contraseña no estén vacíos.
-            if (name == null || name.isEmpty() || password == null || password.isEmpty()) {
-                res.status(400); // Bad Request.
-                model.put("errorMessage", "Algún campo vacio.");
-                model.put("returnUrl", "/user/new");  
+            // Validación de campos vacíos
+            if (name == null || name.isEmpty() ||
+                password == null || password.isEmpty()) {
 
+                res.status(400);
+                model.put("errorMessage", "Algún campo vacío.");
+                model.put("returnUrl", "/user/new");
+                return new ModelAndView(model, "message.mustache");
             }
 
             try {
                 User user = new User();
-                // Hashea la contraseña usando BCrypt antes de almacenarla, por seguridad.
                 String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-                user.set("username", name); // Establece el nombre de usuario.
-                user.set("password", hashedPassword); // Establece la contraseña hasheada.
-                user.saveIt(); // Guarda el nuevo usuario en la base de datos.
+                user.set("username", name);
+                user.set("password", hashedPassword);
+                user.saveIt();
 
-                res.status(201); // Created.
-
+                res.status(201);
                 model.put("successMessage", "La cuenta fue creada exitosamente.");
                 model.put("returnUrl", "/");
-
-
             } catch (Exception e) {
-                // Manejo de errores en caso de fallo al registrar la cuenta.
-                System.err.println("Error al registrar la cuenta: " + e.getMessage());
-                e.printStackTrace();
-                res.status(500); // Internal Server Error.
+                System.err.println("Error al registrar: " + e.getMessage());
+                res.status(500);
                 model.put("errorMessage", "Algo anduvo mal!!");
-                model.put("returnUrl", "/user/new");  
+                model.put("returnUrl", "/user/new");
             }
-            
-            return new ModelAndView(model, "message.mustache");
 
+            return new ModelAndView(model, "message.mustache");
         }, new MustacheTemplateEngine());
 
-
-
-
-
-        // Ruta POST para manejar el inicio de sesión.
+        // ── POST /login : procesa inicio de sesión ───────────────────────────
         post("/login", (req, res) -> {
-                 System.out.println(">>   post /login");
+            System.out.println(">> POST /login");
+
             Map<String, Object> model = new HashMap<>();
+            String username          = req.queryParams("username");
+            String plainTextPassword = req.queryParams("password");
+            model.put("returnUrl", "/");
 
-            String username = req.queryParams("username"); // Obtiene el nombre de usuario del formulario.
-            String plainTextPassword = req.queryParams("password"); // Obtiene la contraseña en texto plano.
+            // Validación de campos vacíos
+            if (username == null || username.isEmpty() ||
+                plainTextPassword == null || plainTextPassword.isEmpty()) {
 
-            // Valida que el nombre de usuario y la contraseña no estén vacíos.
-            if (username == null || username.isEmpty() || plainTextPassword == null || plainTextPassword.isEmpty()) {
-                res.status(400); // Bad Request.
-                model.put("errorMessage", "El nombre de usuario y la contraseña son requeridos.");
-                return new ModelAndView(model, "login.mustache"); // Retorna la vista de login con mensaje de error.
+                res.status(400);
+                model.put("errorMessage",
+                          "El nombre de usuario y la contraseña son requeridos.");
+                return new ModelAndView(model, "message.mustache");
             }
 
-            // Busca al usuario en la base de datos por su nombre de usuario.
-            User ac = User.findFirst("username = ?", username);
-
-            // Si no se encuentra el usuario.
-            if (ac == null) {
-                res.status(401); // Unauthorized.
+            // Búsqueda de usuario
+            User user = User.findFirst("username = ?", username);
+            if (user == null) {
+                res.status(401);
                 model.put("errorMessage", "Usuario o contraseña incorrectos.");
-                return new ModelAndView(model, "login.mustache"); // Retorna la vista de login con mensaje de error.
+                return new ModelAndView(model, "message.mustache");
             }
 
-            String storedHashedPassword = ac.getString("password"); // Obtiene la contraseña hasheada almacenada.
+            // Verificación de contraseña
+            if (BCrypt.checkpw(plainTextPassword, user.getString("password"))) {
+                res.status(200);
+                req.session(true).attribute("currentUserUsername", username);
+                req.session().attribute("userId", user.getId());
+                req.session().attribute("loggedIn", true);
 
-            // Verifica si la contraseña en texto plano coincide con la contraseña hasheada almacenada.
-            if (BCrypt.checkpw(plainTextPassword, storedHashedPassword)) {
-                res.status(200); // OK.
-
-                // Establece atributos en la sesión para indicar que el usuario ha iniciado sesión.
-                req.session(true).attribute("currentUserUsername", username); // Nombre de usuario actual.
-                req.session().attribute("userId", ac.getId()); // ID del usuario.
-                req.session().attribute("loggedIn", true); // Bandera de inicio de sesión.
-
-                System.out.println("DEBUG: Login exitoso para la cuenta: " + username);
-                System.out.println("DEBUG: ID de Sesión: " + req.session().id());
-
-                model.put("username", username);
                 model.put("successMessage", "Usuario logeado!!.");
-                model.put("returnUrl", "/");
-
             } else {
-                res.status(401); // Unauthorized.
-                System.out.println("DEBUG: Intento de login fallido para: " + username);
+                res.status(401);
                 model.put("errorMessage", "Usuario o contraseña incorrectos.");
-                model.put("returnUrl", "/");
-                
             }
+
             return new ModelAndView(model, "message.mustache");
         }, new MustacheTemplateEngine());
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-    } // Cierre del método main
-
-} // Cierre de la clase App
