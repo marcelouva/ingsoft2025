@@ -1,11 +1,8 @@
 package com.is1.proyecto;
 
-// Importaciones necesarias para la aplicación Spark, manejo de JSON, base de datos y seguridad.
-import com.fasterxml.jackson.databind.ObjectMapper; // Para serializar/deserializar objetos JSON.
 import static spark.Spark.*; // Importa los métodos estáticos de Spark para definir rutas y configuraciones.
 
 import org.javalite.activejdbc.Base; // Para la conexión y operaciones con la base de datos usando ActiveJDBC.
-import org.javalite.activejdbc.DB;
 import org.mindrot.jbcrypt.BCrypt; // Para el hashing de contraseñas de forma segura.
 
 import spark.ModelAndView; // Para renderizar plantillas con un modelo de datos.
@@ -14,27 +11,11 @@ import spark.template.mustache.MustacheTemplateEngine; // Motor de plantillas Mu
 import java.util.HashMap; // Para crear mapas de datos que se pasan a las plantillas.
 import java.util.Map; // Interfaz Map.
 
-import javax.management.relation.Role;
-
 import com.is1.proyecto.config.DBConfigSingleton; // Configuración Singleton para la base de datos.
-import com.is1.proyecto.models.Person; // Modelo de datos para la entidad Persona.
-import com.is1.proyecto.models.Subject;
 import com.is1.proyecto.models.User; // Modelo de datos para la entidad Usuario.
 
 
-/**
- * Clase principal de la aplicación Spark.
- * Configura las rutas, filtros y el inicio del servidor web.
- * Esta clase es el punto de entrada para la aplicación web.
- */
 public class App {
-
-    // Instancia de ObjectMapper para convertir objetos Java a JSON y viceversa.
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    // private static final String SCHEMA_SQL_FILE = "scheme.sql"; // Esta línea está comentada y no se usa directamente aquí.
-                                                                 // Sugiere que la inicialización del esquema se maneja de otra forma.
-
     public static void main(String[] args) {
         port(8080); // Configura el puerto en el que la aplicación Spark escuchará las peticiones HTTP (puerto 8080).
 
@@ -71,7 +52,8 @@ public class App {
         // --- Rutas GET para renderizar formularios y páginas HTML ---
 
         // Ruta para mostrar el formulario de creación de usuario.
-        get("/user/create", (req, res) -> {
+        get("/user/new", (req, res) -> {
+            System.out.println(">>   get /user/new");
             Map<String, Object> model = new HashMap<>();
             // Verifica si hay un mensaje de éxito en los parámetros de la URL y lo añade al modelo.
             String successMessage = req.queryParams("message");
@@ -87,26 +69,10 @@ public class App {
             return new ModelAndView(model, "user_form.mustache");
         }, new MustacheTemplateEngine());
 
-        // Ruta para mostrar el panel de control (dashboard). Requiere inicio de sesión.
-        get("/dashboard", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-            // Recupera el nombre de usuario y el estado de inicio de sesión de la sesión.
-            String currentUsername = req.session().attribute("currentUserUsername");
-            Boolean loggedIn = req.session().attribute("loggedIn");
-
-            // Si el usuario no está logueado, redirige a la página de login con un mensaje de error.
-            if (currentUsername == null || loggedIn == null || !loggedIn) {
-                System.out.println("DEBUG: Acceso no autorizado a /dashboard. Redirigiendo a /login.");
-                res.redirect("/login?error=Debes iniciar sesión para acceder a esta página.");
-                return null; // Importante retornar null después de una redirección para evitar procesamiento adicional.
-            }
-            // Si está logueado, añade el nombre de usuario al modelo y renderiza el dashboard.
-            model.put("username", currentUsername);
-            return new ModelAndView(model, "dashboard.mustache");
-        }, new MustacheTemplateEngine());
 
         // Ruta para cerrar la sesión del usuario.
         get("/logout", (req, res) -> {
+            System.out.println(">> get   /logout");
             req.session().invalidate(); // Invalida la sesión actual, eliminando todos sus atributos.
             System.out.println("DEBUG: Sesión cerrada. Redirigiendo a /login.");
             res.redirect("/"); // Redirige a la página de inicio (login).
@@ -120,6 +86,7 @@ public class App {
 
         // Ruta para la página de inicio, que es el formulario de login.
         get("/", (req, res) -> {
+            System.out.println(">>   get /");
             Map<String, Object> model = new HashMap<>();
             // Manejo de mensajes de error y éxito pasados como parámetros de la URL.
             String errorMessage = req.queryParams("error");
@@ -136,181 +103,63 @@ public class App {
 
         // Ruta alternativa para mostrar el formulario de creación de usuario (redirecciona a /user/create).
         get("/user/new", (req, res) -> {
+        System.out.println(">>   get /user/new");
+
+
             return new ModelAndView(new HashMap<>(), "user_form.mustache");
         }, new MustacheTemplateEngine());
 
 
         // --- Rutas POST para manejar envíos de formularios y APIs ---
 
-        // Ruta para procesar el envío del formulario de creación de un nuevo usuario.
-        post("/user/new", (req, res) -> {
+
+
+
+
+
+
+  post("/user/new", (req, res) -> {
+            System.out.println(">>   post /user/new");
+
+            Map<String, Object> model = new HashMap<>();
             String name = req.queryParams("name"); // Obtiene el nombre de usuario del formulario.
             String password = req.queryParams("password"); // Obtiene la contraseña del formulario.
-            String rol = req.queryParams("rol"); // Obtiene la contraseña del formulario.
 
             // Valida que el nombre y la contraseña no estén vacíos.
             if (name == null || name.isEmpty() || password == null || password.isEmpty()) {
                 res.status(400); // Bad Request.
-                res.redirect("/user/create?error=Nombre y contraseña son requeridos."); // Redirige con mensaje de error.
-                return "";
+                model.put("errorMessage", "Algún campo vacio.");
+                model.put("returnUrl", "/user/new");  
+
             }
 
             try {
-                User ac = new User();
+                User user = new User();
                 // Hashea la contraseña usando BCrypt antes de almacenarla, por seguridad.
                 String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-                ac.set("username", name); // Establece el nombre de usuario.
-                ac.set("password", hashedPassword); // Establece la contraseña hasheada.
-                ac.set("rol",rol);
-                ac.saveIt(); // Guarda el nuevo usuario en la base de datos.
+                user.set("username", name); // Establece el nombre de usuario.
+                user.set("password", hashedPassword); // Establece la contraseña hasheada.
+                user.saveIt(); // Guarda el nuevo usuario en la base de datos.
 
                 res.status(201); // Created.
-                res.redirect("/user/create?message=Cuenta creada exitosamente para " + name + "!"); // Redirige con mensaje de éxito.
-                return "";
+
+                model.put("successMessage", "La cuenta fue creada exitosamente.");
+                model.put("returnUrl", "/");
+
 
             } catch (Exception e) {
                 // Manejo de errores en caso de fallo al registrar la cuenta.
                 System.err.println("Error al registrar la cuenta: " + e.getMessage());
                 e.printStackTrace();
                 res.status(500); // Internal Server Error.
-                res.redirect("/user/create?error=Error interno al crear la cuenta. Intente de nuevo."); // Redirige con mensaje de error genérico.
-                return "";
+                model.put("errorMessage", "Algo anduvo mal!!");
+                model.put("returnUrl", "/user/new");  
             }
-        });
+            
+            return new ModelAndView(model, "message.mustache");
 
-        // Ruta GET para mostrar el formulario de registro de datos personales (Person).
-         get("/person", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-
-            // --- Manejo de mensajes de éxito y error (mantener) ---
-            String successMessage = req.queryParams("message");
-            if (successMessage != null && !successMessage.isEmpty()) {
-                model.put("successMessage", successMessage);
-            }
-            String errorMessage = req.queryParams("error");
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                model.put("errorMessage", errorMessage);
-            }
-            // --- Fin manejo de mensajes ---
-
-            // --- Lógica para precargar los datos de la Persona del usuario ---
-            Object userId = req.session().attribute("userId");
-
-            if (userId == null) {
-                // Si no hay userId en la sesión, el usuario no está logueado o la sesión expiró.
-                res.status(401); // Unauthorized
-                model.put("errorMessage", "Debe iniciar sesión para acceder.");
-                return new ModelAndView(model, "login.mustache");
-            }
-
-            // Aquí asumo que 'User.findFirst("id = ?", userId)' es un método válido para tu ORM
-            // y que 'User' tiene un método 'getPerson()' que devuelve un objeto 'Person'.
-            User us = User.findFirst("id = ?", userId);
-
-            if (us != null) {
-               Person p = us.getPerson(); // Obtiene la persona asociada al usuario
-
-                if (p != null) {
-
-                    // Si ya existe la info de persona asociada al usuario
-                    model.put("person", p); // Pasa el objeto 'Person' al modelo
-                    model.put("isEditing", true); // Indica que se están editando datos existentes
-                    model.put("formTitle", "Modificar mis Datos Personales"); // Título para edición
-                } else {
-                    // El usuario existe, pero no tiene datos de Persona aún
-                    model.put("isEditing", false); // Indica que es un nuevo registro
-                    model.put("formTitle", "Completar mis Datos Personales"); // Título para nuevo registro
-                }
-            } else {
-                // Esto podría indicar un problema si el userId está en sesión pero el User no se encuentra
-                res.status(404); // Not Found o algún otro error apropiado
-                model.put("errorMessage", "Error: Usuario no encontrado para el ID de sesión.");
-                return new ModelAndView(model, "error.mustache"); // Redirigir a una página de error o login
-            }
-            // --- Fin lógica de precarga ---
-
-            return new ModelAndView(model, "person.mustache");
         }, new MustacheTemplateEngine());
-
-       
-
-
-       post("/person/new", (req, res) -> {
-            Object userId = req.session().attribute("userId");
-
-            // --- Nuevos campos para manejar la edición ---
-            String personIdParam = req.queryParams("id"); // Obtiene el ID de la persona si está editando
-            boolean isEditing = (personIdParam != null && !personIdParam.isEmpty());
-            // --- Fin nuevos campos ---
-
-            String name = req.queryParams("name");
-            String dni = req.queryParams("dni");
-            String birth_date = req.queryParams("birth_date");
-
-            if (name == null || name.isEmpty() || dni == null || dni.isEmpty()) {
-                res.status(400);
-                res.redirect("/person?error=Falta tu nombre o DNI.");
-                return "";
-            }
-
-            try {
-                Person p;
-                if (isEditing) {
-                    // Si estamos editando, cargamos la persona existente por su ID
-                    p = Person.findById(Long.parseLong(personIdParam));
-                    if (p == null) {
-                        res.status(404); // Not Found si no se encuentra la persona
-                        res.redirect("/person?error=Persona no encontrada para actualizar.");
-                        return "";
-                    }
-                    // Opcional: Asegurarse de que el usuario actual es dueño de esta persona
-                    // Esto es crucial para seguridad en un entorno real
-                    if (!p.get("user_id").equals(userId)) {
-                        res.status(403); // Forbidden
-                        res.redirect("/dashboard?error=Acceso denegado.");
-                        return "";
-                    }
-
-                } else {
-                    // Si NO estamos editando, creamos una nueva instancia de Persona
-                    p = new Person();
-                    // IMPORTANTE: Asegúrate de que no haya ya una persona vinculada a este userId
-                    // Dado que user_id es UNIQUE, si ya existe una persona para este userId,
-                    // saveIt() lanzará una excepción (violación de unicidad).
-                    // Esto es lo que queremos para un 1:1.
-                    p.set("user_id", userId); // Vincula la nueva persona con el ID de usuario.
-                }
-
-                p.set("name", name);
-                p.set("dni", dni);
-                p.set("birth_date", birth_date);
-
-                p.saveIt(); // Guarda (inserta o actualiza) los datos.
-
-                res.status(201); // O 200 OK si es una actualización
-                String message = isEditing ? "Datos actualizados exitosamente." : "Datos registrados exitosamente.";
-                res.redirect("/person?message=" + message + " " + name + "!");
-                return "";
-            } catch (NumberFormatException e) {
-                res.status(400); // Bad Request si el ID no es un número válido
-                res.redirect("/person?error=ID de persona inválido.");
-                return "";
-            } catch (Exception e) {
-                System.err.println("Error al procesar el perfil de la cuenta: " + e.getMessage());
-                e.printStackTrace();
-                res.status(500);
-                res.redirect("/person?error=Error al procesar los datos.");
-                return "";
-            }
-        });
-
-
-   
-
-
-
-
 
 
 
@@ -318,6 +167,7 @@ public class App {
 
         // Ruta POST para manejar el inicio de sesión.
         post("/login", (req, res) -> {
+                 System.out.println(">>   post /login");
             Map<String, Object> model = new HashMap<>();
 
             String username = req.queryParams("username"); // Obtiene el nombre de usuario del formulario.
@@ -354,71 +204,20 @@ public class App {
                 System.out.println("DEBUG: Login exitoso para la cuenta: " + username);
                 System.out.println("DEBUG: ID de Sesión: " + req.session().id());
 
-
                 model.put("username", username);
-                return new ModelAndView(model, "dashboard.mustache"); // Redirige al dashboard.
+                model.put("successMessage", "Usuario logeado!!.");
+                model.put("returnUrl", "/");
+
             } else {
                 res.status(401); // Unauthorized.
                 System.out.println("DEBUG: Intento de login fallido para: " + username);
                 model.put("errorMessage", "Usuario o contraseña incorrectos.");
-                return new ModelAndView(model, "login.mustache"); // Retorna la vista de login con mensaje de error.
+                model.put("returnUrl", "/");
+                
             }
+            return new ModelAndView(model, "message.mustache");
         }, new MustacheTemplateEngine());
 
-
-
-     // curl -X POST http://localhost:8080/ppp
-       post("/ppp", (req, res) -> {
-        User newUser = new User();
-        newUser.set("username", "marcos" + System.currentTimeMillis()); // Nombre de usuario único
-        newUser.set("email", "zxczc" + System.currentTimeMillis() + "@example.com"); // Email único
-        newUser.set("password", BCrypt.hashpw("111", BCrypt.gensalt())); // Contraseña hasheada
-        newUser.set("rol", "0"); // Ejemplo: rol de profesor
-        newUser.saveIt(); // Guarda el usuario primero para que tenga un ID
-
-        // Ahora que newUser tiene un ID, podemos asociar el Subject
-        Subject subject2 = new Subject();
-        subject2.set("code", "ING102_" + System.currentTimeMillis()); // Código único para la materia
-        subject2.set("name", "Introducción a la Ingeniería 2");
-        subject2.set("description", "Conceptos fundamentales de la ingeniería.");
-        // ActiveJDBC manejará la asignación de user_id a través de addSubject
-        newUser.addSubject(subject2); // Esto guardará subject2 y establecerá user_id
-
-
-        Subject subject3 = new Subject();
-        subject3.set("code", "3309");
-        subject3.set("name", "Matemática 2");
-        subject3.set("description", "nn");
-        newUser.addSubject(subject3); // Esto guardará subject2 y establecerá user_id
-
-
-        return "OK";
-    });
-
-
-
-    post("/crearRelacionUvaMate", (req, res) -> {
-        // 1. Crear el usuario "uva111"
-        User userUva = new User();
-        userUva.set("username", "uva111"); // Nombre de usuario específico
-        userUva.set("email", "uva111_" + System.currentTimeMillis() + "@example.com"); // Email único
-        userUva.set("password", BCrypt.hashpw("passwordUva123", BCrypt.gensalt())); // Contraseña hasheada
-        userUva.set("rol", 0); // Ejemplo: rol de estudiante
-        userUva.saveIt(); // Guarda el usuario para obtener su ID
-
-        // 2. Crear la materia "Mate1"
-        Subject subjectMate1 = new Subject();
-        subjectMate1.set("code", "MATE1"); // Código específico para la materia
-        subjectMate1.set("name", "Mate1"); // Nombre de la materia específico
-        subjectMate1.set("description", "Matemáticas Nivel 1: Fundamentos.");
-        subjectMate1.saveIt(); // Guarda la materia para obtener su ID
-
-        // 3. Establecer la relación entre "uva111" y "Mate1"
-        // ActiveJDBC se encargará de insertar la entrada en la tabla 'users_subjects'
-        userUva.addSubject(subjectMate1);
-
-        return "OK: Usuario 'uva111', materia 'Mate1' creados y relacionados exitosamente.";
-    });
 
 
 
