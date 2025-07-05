@@ -7,3 +7,14 @@ CREATE TABLE users (
     username TEXT NOT NULL UNIQUE,      -- Nombre de usuario para login
     password TEXT NOT NULL        -- Contraseña hasheada
 );
+
+CREATE TABLE profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    name TEXT NOT NULL,
+    dni TEXT UNIQUE NOT NULL,
+    user_id INTEGER UNIQUE, --vincula a un profile con un usuario
+    FOREIGN KEY (user_id) REFERENCES users(id)
+
+);
+    
