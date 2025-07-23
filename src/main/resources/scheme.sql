@@ -8,13 +8,14 @@ CREATE TABLE users (
     password TEXT NOT NULL        -- Contraseña hasheada
 );
 
+DROP TABLE IF EXISTS profiles;
+
 CREATE TABLE profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL,
     name TEXT NOT NULL,
     dni TEXT UNIQUE NOT NULL,
-    user_id INTEGER UNIQUE, --vincula a un profile con un usuario
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    user_id INTEGER UNIQUE NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Opcional: ON DELETE CASCADE
 
 );
-    

@@ -2,12 +2,13 @@ package com.is1.proyecto.models;
 
 
 import org.javalite.activejdbc.Model;
+import org.javalite.activejdbc.annotations.BelongsTo;
 import org.javalite.activejdbc.annotations.Table;
 
-// La anotación @BelongsTo es crucial para indicar que un Profile
-// siempre pertenece a un User. ActiveJDBC usará esto para encontrar
-// el User asociado a través de la clave foránea user_id.
+
+//@BelongsTo(parent = User.class)      // importa org.javalite.activejdbc.annotations.BelongsTo
 @Table("profiles")
+
 public class Profile extends Model {
 
     public String getEmail() {
@@ -45,5 +46,12 @@ public class Profile extends Model {
     public User getUser() {
         return this.parent(User.class);
     }
-    
+
 }
+
+
+
+
+
+
+

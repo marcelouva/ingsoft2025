@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.is1.proyecto.config.DBConfigSingleton;
+import com.is1.proyecto.models.Profile;
 import com.is1.proyecto.models.User;
 
 // ─── APLICACIÓN PRINCIPAL ─────────────────────────────────────────────────────
@@ -41,6 +42,33 @@ public class App {
                 );
             }
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // ── Filtro AFTER: cierra conexión BD ─────────────────────────────────
         after((req, res) -> {
@@ -114,6 +142,97 @@ public class App {
             return new ModelAndView(model, "message.mustache");
         }, new MustacheTemplateEngine());
 
+//**********************************
+
+
+
+
+
+
+get("/profile/new", (req, res) -> {
+    Map<String, Object> model = new HashMap<>();
+    // Puedes agregar mensajes de éxito o error si vienen de una redirección
+    // model.put("successMessage", req.session().attribute("success"));
+    // model.put("errorMessage", req.session().attribute("error"));
+    return new ModelAndView(model, "profile.mustache"); // Asumiendo que guardaste el HTML como profile_form.html
+}, new MustacheTemplateEngine());
+
+
+
+
+get("/dashboard", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+
+            // 1. Obtener el nombre de usuario de la sesión
+            String userName = req.session().attribute("currentUserUsername");
+
+            // 2. Verificar si el nombre de usuario existe en la sesión
+            if (userName != null) {
+                model.put("userName", userName); // Si existe, agrégalo al modelo
+            } else {
+                // Opcional: Si el usuario no está logueado o el nombre no está en sesión,
+                // puedes redirigirlo a la página de login o mostrar un mensaje de error.
+                // Por ejemplo:
+                res.redirect("/login");
+                return null; // Detener la ejecución del endpoint actual
+            }
+
+            // 3. Renderizar la plantilla con el modelo
+            return new ModelAndView(model, "dashboard.mustache");
+        }, new MustacheTemplateEngine());
+
+
+
+        post("/user/p1", (req, res) -> {
+            System.out.println(">> POST /user/new");
+            Map<String, Object> model = new HashMap<>();
+
+
+
+            
+            return new ModelAndView(model, "message.mustache");
+        }, new MustacheTemplateEngine());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//******************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // ── POST /login : procesa inicio de sesión ───────────────────────────
         post("/login", (req, res) -> {
             System.out.println(">> POST /login");
@@ -148,7 +267,12 @@ public class App {
                 req.session().attribute("userId", user.getId());
                 req.session().attribute("loggedIn", true);
 
-                model.put("successMessage", "Usuario logeado!!.");
+                // con las dos lineas que siguen redirecciona al dashboard
+                res.redirect("/dashboard");
+                return null; // Detener la ejecución del endpoint actual
+
+                //model.put("returnUrl", "/dashboard");
+                //model.put("successMessage", "Usuario logeado!!.");
             } else {
                 res.status(401);
                 model.put("errorMessage", "Usuario o contraseña incorrectos.");
