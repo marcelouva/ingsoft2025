@@ -6,7 +6,7 @@ import org.javalite.activejdbc.annotations.BelongsTo;
 import org.javalite.activejdbc.annotations.Table;
 
 
-//@BelongsTo(parent = User.class)      // importa org.javalite.activejdbc.annotations.BelongsTo
+@BelongsTo(parent = User.class, foreignKeyName = "user_id")      // importa org.javalite.activejdbc.annotations.BelongsTo
 @Table("profiles")
 
 public class Profile extends Model {

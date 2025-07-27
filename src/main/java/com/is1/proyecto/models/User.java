@@ -5,7 +5,7 @@ import org.javalite.activejdbc.annotations.HasMany;
 import org.javalite.activejdbc.annotations.Table;
 
 
-//@HasMany(child = Profile.class, foreignKeyName = "user_id") // importa HasMany
+@HasMany(child = Profile.class, foreignKeyName = "user_id") 
 @Table("users")
 public class User extends Model {
     

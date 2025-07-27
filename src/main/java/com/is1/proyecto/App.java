@@ -181,7 +181,70 @@ get("/dashboard", (req, res) -> {
             return new ModelAndView(model, "dashboard.mustache");
         }, new MustacheTemplateEngine());
 
+//*********************************************************** */
 
+
+        post("/profile/new", (req, res) -> {
+            System.out.println(">> POST /profile/new");
+            Map<String, Object> model = new HashMap<>();
+            model.put("successMessage", "Perfil creado!!");
+            model.put("returnUrl", "/dashboard");
+
+            //recupero el id del usuario guardado en la sesión.
+            Integer userId = req.session().attribute("userId");
+  
+
+            String name     = req.queryParams("name");
+            String dni = req.queryParams("dni");
+            String email = req.queryParams("email");
+            
+
+            try {
+                Profile p = new Profile();
+                
+                p.set("name", name);
+                p.set("email", email);
+                p.set("dni", dni);
+
+                //aca relaciono el usuario con su perfil
+                p.set("user_id", userId); 
+                p.saveIt();
+
+                res.status(201);
+                model.put("returnUrl", "/dashboard");
+            } catch (Exception e) {
+                System.err.println("Error al registrar: " + e.getMessage());
+                res.status(500);
+                model.put("errorMessage", "Error al registrar el perfil!!");
+                model.put("returnUrl", "/profile/new");
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            return new ModelAndView(model, "message.mustache");
+        }, new MustacheTemplateEngine());
+
+
+
+
+
+
+
+//************************************************************* */
 
         post("/user/p1", (req, res) -> {
             System.out.println(">> POST /user/new");
