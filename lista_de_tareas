@@ -21,6 +21,7 @@ la tabla tiene users se define:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL,
                 name TEXT NOT NULL,
+                rol integer NOT NULL,
                 dni TEXT UNIQUE NOT NULL,
                 user_id INTEGER UNIQUE NOT NULL, 
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Opcional: ON DELETE CASCADE
