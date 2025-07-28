@@ -8,7 +8,6 @@ import org.javalite.activejdbc.annotations.Table;
 @Table("users")
 public class User extends Model {
 
-
     public String getUsername() {
         return getString("username");
     }
@@ -24,5 +23,22 @@ public class User extends Model {
     public void setPassword(String password) {
         set("password", password);
     }
+
+    public Integer getId(){
+        return getInteger("id");
+    }
+
+
+    public Student getStudent() {
+        return Student.findFirst("user_id = ?", this.getId());
+    }
+
+     public Professor getProfessor() {
+        return Professor.findFirst("user_id = ?", this.getId());
+    }
+
+
+
+
 
 }
