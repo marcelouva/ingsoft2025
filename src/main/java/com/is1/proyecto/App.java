@@ -5,10 +5,8 @@ import static spark.Spark.*;
 import org.javalite.activejdbc.Base;
 import org.javalite.activejdbc.DBException;
 import org.mindrot.jbcrypt.BCrypt;
-
 import spark.ModelAndView;
 import spark.template.mustache.MustacheTemplateEngine;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
