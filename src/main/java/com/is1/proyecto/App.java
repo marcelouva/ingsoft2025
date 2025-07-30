@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.is1.proyecto.config.DBConfigSingleton;
-import com.is1.proyecto.models.Professor;
 import com.is1.proyecto.models.Student;
 
 import com.is1.proyecto.models.User;
@@ -121,123 +120,6 @@ public class App {
 
         // ________________________________________________________________________________
         //este endpoint es para cargar mediante curl un User con su relacion con Student
-
-
-
-// Endpoint para cargar un nuevo User con su relación con Student
-//  curl -X POST http://localhost:8080/cargastudiante
-
-        post("/cargastudiante", (req, res) -> {
-            System.out.println(">> POST /api/register-profile");
-            Map<String, Object> model = new HashMap<>();
-            res.type("application/json"); // Aseguramos que la respuesta sea JSON
-
-            String username = "dmaradona";
-            String password = "111";
-            String firstName = "Diego";
-            String lastName = "Maradona";
-            String careerName = "Analista en Computación";
-            String studentIdNumber = "1200";
-            try  {
-                // 1. Crear y guardar el Usuario
-                User user = new User();
-                String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-
-                user.set("username", username);
-                user.set("password", hashedPassword);
-                user.saveIt(); // Guardamos el usuario para obtener su ID
-
-                Integer userId = user.getId(); // Obtenemos el ID del usuario recién creado
-                Student student = new Student();
-                student.set("user_id", userId);
-                student.set("first_name", firstName);
-                student.set("last_name", lastName);
-                student.set("student_id_number", studentIdNumber);
-                student.set("career_name", careerName);
-                student.saveIt();
-
-                res.status(201);
-                model.put("successMessage", "Usuario logeado!!.");
-            } 
-            
-             catch (DBException e) {
-            
-                res.status(401);
-                model.put("errorMessage", "Ha ocurrido un problema.");
-                System.err.println("Error al guardar: " + e.getMessage());
-
-            }
-
-            return new ModelAndView(model, "message.mustache");
-        }, new MustacheTemplateEngine());
-
-
-        // ________________________________________________________________________________
-
-
- // Nuevo Endpoint GET /api/users-with-profiles : Retorna todos los usuarios con sus perfiles (estudiante/profesor) en JSON
-         // ________________________________________________________________________________
-
- get("/listadeusuarios", (req, res) -> {
-            System.out.println(">> GET /listadeusuarios"); // Log actualizado para coincidir con la URL
-            res.type("application/json"); // Aseguramos que la respuesta sea JSON
-            List<Map<String, Object>> usersWithProfiles = new ArrayList<>();
-
-            try {
-                // Obtener todos los usuarios
-                List<User> users = User.findAll();
-
-                for (User user : users) {
-                    Map<String, Object> userMap = new HashMap<>();
-                    userMap.put("id", user.getId());
-                    userMap.put("username", user.getUsername());
-                    // No incluir la contraseña hasheada por seguridad en la respuesta JSON
-
-                    // Intentar obtener el perfil de estudiante
-                    // Usamos los métodos getStudent() y getProfessor() que definiste en tu modelo User
-                    Student studentProfile = user.getStudent();
-                    if (studentProfile != null) {
-                        Map<String, Object> studentMap = new HashMap<>();
-                        studentMap.put("id", studentProfile.getId());
-                        studentMap.put("firstName", studentProfile.getFirstName());
-                        studentMap.put("lastName", studentProfile.getLastName());
-                        studentMap.put("studentIdNumber", studentProfile.getStudentIdNumber());
-                        studentMap.put("careerName", studentProfile.getCareerName());
-                        userMap.put("profileType", "student"); // Añadir el tipo de perfil
-                        userMap.put("profile", studentMap);     // Añadir los datos del perfil
-                    } else {
-                        // Si no es estudiante, intentar obtener el perfil de profesor
-                        Professor professorProfile = user.getProfessor(); // Usamos el método getProfessor()
-                        if (professorProfile != null) {
-                            Map<String, Object> professorMap = new HashMap<>();
-                            professorMap.put("id", professorProfile.getId());
-                            professorMap.put("firstName", professorProfile.getFirstName());
-                            professorMap.put("lastName", professorProfile.getLastName());
-                            professorMap.put("employeeIdNumber", professorProfile.getEmployeeIdNumber());
-                            professorMap.put("department", professorProfile.getDepartment());
-                            userMap.put("profileType", "professor"); // Añadir el tipo de perfil
-                            userMap.put("profile", professorMap);     // Añadir los datos del perfil
-                        } else {
-                            // Usuario sin perfil específico (solo cuenta de usuario)
-                            userMap.put("profileType", "none");
-                            userMap.put("profile", null);
-                        }
-                    }
-                    usersWithProfiles.add(userMap);
-                }
-
-                res.status(200); // 200 OK
-                return usersWithProfiles; // Spark serializará la lista a JSON
-
-            } catch (Exception e) {
-                System.err.println("Error al obtener usuarios con perfiles: " + e.getMessage());
-                res.status(500); // 500 Internal Server Error
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("status", "error");
-                errorResponse.put("message", "Error interno del servidor al obtener los perfiles.");
-                return errorResponse; // Retornar un JSON de error
-            }
-        });
 
 
 
