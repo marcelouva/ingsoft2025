@@ -78,6 +78,16 @@ public class App {
             return new ModelAndView(model, "login.mustache");
         }, new MustacheTemplateEngine());
 
+       
+        get("/professor", (req, res) -> {
+            System.out.println(">> GET /");
+            Map<String, Object> model = new HashMap<>();
+            return new ModelAndView(model, "professor.mustache");
+        }, new MustacheTemplateEngine());
+
+       
+       
+       
         // ── POST /user/new : procesa alta de usuario ─────────────────────────
         post("/user/new", (req, res) -> {
             System.out.println(">> POST /user/new");
@@ -159,8 +169,15 @@ public class App {
                 req.session(true).attribute("currentUserUsername", username);
                 req.session().attribute("userId", user.getId());
                 req.session().attribute("loggedIn", true);
-
+ 
                 model.put("successMessage", "Usuario logeado!!.");
+                res.redirect("/professor");
+            
+
+
+
+
+
             } else {
                 res.status(401);
                 model.put("errorMessage", "Usuario o contraseña incorrectos.");
