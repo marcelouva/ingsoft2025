@@ -61,10 +61,22 @@
       <version>${jakarta.persistence.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.javalite</groupId>
-      <artifactId>activejdbc</artifactId>
-      <version>${activejdbc.version}</version>
+        <groupId>org.javalite</groupId>
+        <artifactId>activejdbc</artifactId>
+        <version>${activejdbc.version}</version>
     </dependency>
+
+    <dependency>
+        <groupId>org.javalite</groupId>
+        <artifactId>activejdbc-instrumentation</artifactId>
+        <version>${activejdbc.version}</version>
+    </dependency>
+
+
+
+
+
+
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>

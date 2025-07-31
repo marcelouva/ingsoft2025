@@ -8,6 +8,10 @@ import org.javalite.activejdbc.annotations.Table;
 @Table("users")
 public class User extends Model {
 
+    public Professor getProfessor() {
+       return Professor.findFirst("user_id = ?", this.getId());
+    }
+
 
     public String getUsername() {
         return getString("username");

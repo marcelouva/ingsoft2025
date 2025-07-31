@@ -6,44 +6,51 @@ import org.javalite.activejdbc.annotations.BelongsTo; // Importa BelongsTo
 @BelongsTo(parent = User.class, foreignKeyName = "user_id")
 public class Professor extends Model {
 
-    public String getFirstName() {
-        return getString("first_name");
+    public String getName() {
+        return getString("name");
     }
 
-    public void setFirstName(String firstName) {
-        set("first_name", firstName);
+    public void setName(String name) {
+        set("name", name);
     }
 
+    public String getEmail() {
+        return getString("email");
+    }
+
+    public void setEmail(String email) {
+        set("email", email);
+    }
+
+    
     public String getLastName() {
         return getString("last_name");
     }
 
-    public void setLastName(String lastName) {
-        set("last_name", lastName);
+    public void setLastName(String email) {
+        set("last_name", email);
     }
 
-    public String getEmployeeIdNumber() {
-        return getString("employee_id_number");
+
+
+
+    public Integer getIdEmployee() {
+        return getInteger("id_employee");
     }
 
-    public void setEmployeeIdNumber(String employeeIdNumber) {
-        set("employee_id_number", employeeIdNumber);
-    }
-
-    public String getDepartment() {
-        return getString("department");
-    }
-
-    public void setDepartment(String department) {
-        set("department", department);
-    }
-
-    public Long getUserId() {
-        return getLong("user_id");
-    }
 
     public void setUserId(Long userId) {
         set("user_id", userId);
+    }
+
+
+    public Integer getUserId() {
+        return getInteger("user_id");
+    }
+
+
+ public User getUser() {
+        return parent(User.class);
     }
 
  
