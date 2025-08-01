@@ -12,6 +12,12 @@ public class User extends Model {
        return Professor.findFirst("user_id = ?", this.getId());
     }
 
+    public Student getStudent() {
+       return Student.findFirst("user_id = ?", this.getId());
+    }
+
+
+
 
     public String getUsername() {
         return getString("username");

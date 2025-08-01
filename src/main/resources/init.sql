@@ -23,17 +23,17 @@ INSERT INTO subjects (name) VALUES
 ('Ingeniería de Software'),
 ('Cálculo Avanzado');
 
-INSERT INTO professors_subjects (professor_id, subject_id) VALUES
-(1, 1),
-(1, 2),
-(1, 4);
+-- INSERT INTO professors_subjects (professor_id, subject_id) VALUES
+--(1, 1),
+--(1, 2),
+--(1, 4);
 
-INSERT INTO professors_subjects (professor_id, subject_id) VALUES
-(2, 2),
-(2, 3),
-(2, 5);
+--INSERT INTO professors_subjects (professor_id, subject_id) VALUES
+--(2, 2),
+--(2, 3),
+--(2, 5);
 
-INSERT INTO professors_subjects (professor_id, subject_id) VALUES
-(3, 1),
-(3, 4),
-(3, 5);
+--INSERT INTO professors_subjects (professor_id, subject_id) VALUES
+--(3, 1),
+--(3, 4),
+--(3, 5);

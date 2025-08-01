@@ -87,6 +87,142 @@ public class App {
             return new ModelAndView(model, "professor.mustache");
         }, new MustacheTemplateEngine());
 
+
+        get("/adm", (req, res) -> {
+            System.out.println(">> GET /");
+            Map<String, Object> model = new HashMap<>();
+            return new ModelAndView(model, "dashboardadm.mustache");
+        }, new MustacheTemplateEngine());
+
+
+
+post("/admin/relate", (request, response) -> {
+    Map<String, Object> model = new HashMap<>();
+    String action = request.queryParams("action");
+
+    // =========================================================================
+    // 1. Persistir el estado actual del formulario
+    //    Esto es crucial para que los campos no se "borren" en cada POST.
+    // =========================================================================
+    String teacherIdInput = request.queryParams("teacherIdInput");
+    String subjectIdInput = request.queryParams("subjectIdInput");
+    String selectedTeacherId = request.queryParams("selectedTeacherId");
+    String selectedSubjectId = request.queryParams("selectedSubjectId");
+    
+    // Si ya hay un docente seleccionado, lo volvemos a cargar en el modelo
+    if (selectedTeacherId != null && !selectedTeacherId.isEmpty()) {
+        try {
+            Professor teacher = Professor.findById(Long.parseLong(selectedTeacherId));
+            if (teacher != null) {
+                model.put("teacherName", teacher.get("name"));
+                model.put("selectedTeacherId", teacher.get("id"));
+            }
+        } catch (NumberFormatException e) {
+            // Ignorar el error, se limpiará el campo
+            selectedTeacherId = null;
+        }
+    }
+
+    // Si ya hay una materia seleccionada, la volvemos a cargar en el modelo
+    if (selectedSubjectId != null && !selectedSubjectId.isEmpty()) {
+        try {
+            Subject subject = Subject.findById(Long.parseLong(selectedSubjectId));
+            if (subject != null) {
+                model.put("subjectName", subject.get("name"));
+                model.put("selectedSubjectId", subject.get("id"));
+            }
+        } catch (NumberFormatException e) {
+            // Ignorar el error, se limpiará el campo
+            selectedSubjectId = null;
+        }
+    }
+    
+    // También mantenemos el valor de los inputs para las búsquedas
+    model.put("teacherIdInput", teacherIdInput);
+    model.put("subjectIdInput", subjectIdInput);
+
+
+    // =========================================================================
+    // 2. Ejecutar la acción solicitada por el usuario
+    // =========================================================================
+
+    if ("searchTeacher".equals(action)) {
+        try {
+            long teacherId = Long.parseLong(teacherIdInput);
+            Professor teacher = Professor.findById(teacherId);
+
+            if (teacher != null) {
+                model.put("teacherName", teacher.get("name"));
+                model.put("selectedTeacherId", teacher.get("id"));
+                model.put("successMessage", "Docente encontrado: " + teacher.get("name"));
+            } else {
+                model.put("errorMessage", "No se encontró un docente con el ID: " + teacherIdInput);
+                model.remove("teacherName"); // Limpiamos el nombre si no se encuentra
+                model.remove("selectedTeacherId"); // Limpiamos el ID si no se encuentra
+            }
+        } catch (NumberFormatException e) {
+            model.put("errorMessage", "El ID del docente debe ser un número.");
+        }
+    }
+    else if ("searchSubject".equals(action)) {
+        try {
+            long subjectId = Long.parseLong(subjectIdInput);
+            Subject subject = Subject.findById(subjectId);
+            
+            if (subject != null) {
+                model.put("subjectName", subject.get("name"));
+                model.put("selectedSubjectId", subject.get("id"));
+                model.put("successMessage", "Materia encontrada: " + subject.get("name"));
+            } else {
+                model.put("errorMessage", "No se encontró una materia con el ID: " + subjectIdInput);
+                model.remove("subjectName"); // Limpiamos el nombre si no se encuentra
+                model.remove("selectedSubjectId"); // Limpiamos el ID si no se encuentra
+            }
+        } catch (NumberFormatException e) {
+             model.put("errorMessage", "El ID de la materia debe ser un número.");
+        }
+    }
+    else if ("relate".equals(action)) {
+        if (selectedTeacherId != null && selectedSubjectId != null) {
+            try {
+                long teacherId = Long.parseLong(selectedTeacherId);
+                long subjectId = Long.parseLong(selectedSubjectId);
+
+                Professor teacher = Professor.findById(teacherId);
+                Subject subject = Subject.findById(subjectId);
+                
+                if (teacher != null && subject != null) {
+                    teacher.add(subject);
+                    model.put("successMessage", "Relación creada con éxito entre " + teacher.get("name") + " y " + subject.get("name"));
+                    
+                    // Opcional: Limpiar los campos para una nueva relación
+                    model.remove("teacherName");
+                    model.remove("selectedTeacherId");
+                    model.remove("subjectName");
+                    model.remove("selectedSubjectId");
+                    model.remove("teacherIdInput");
+                    model.remove("subjectIdInput");
+                } else {
+                     model.put("errorMessage", "Error: Docente o materia no encontrados.");
+                }
+
+            } catch (NumberFormatException e) {
+                model.put("errorMessage", "IDs de docente o materia no válidos.");
+            }
+        } else {
+            model.put("errorMessage", "Debe seleccionar un docente y una materia para relacionarlos.");
+        }
+    }
+
+    return new ModelAndView(model, "dashboardadm.mustache");
+}, new MustacheTemplateEngine());
+
+
+
+
+
+
+
         get("/profe", (req, res) -> {
             System.out.println(">> GET /");
             Map<String, Object> model = new HashMap<>();
@@ -236,11 +372,16 @@ public class App {
                         }    
                         break;
                     case 2:
-                        res.redirect("/administrador");
+                        res.redirect("/adm");
                         break;
                     default:
-                        res.redirect("/profe");
-                        break;
+
+                        if (user.getStudent()==null){
+                            res.redirect("/student");
+                        }else{
+                            res.redirect("/dashboard");
+                        }    
+                        break; 
                 }
 
             } else {
@@ -258,13 +399,15 @@ public class App {
 
 
 // El siguiente post asocia un profesor a una materia. 
-// curl -X POST http://localhost:8080/professors/1/subjects/2
+// curl -X POST http://localhost:8080/professors/1/subjects/3
 
 post("/professors/:professor_id/subjects/:subject_id", (req, res) -> {
-    // Abrir conexión si no está abierta
-    if (!Base.hasConnection()) Base.open("org.sqlite.JDBC", "jdbc:sqlite:db/database.db", "", "");
+   
 
     Long professorId = Long.valueOf(req.params(":professor_id"));
+
+   
+   
     Long subjectId = Long.valueOf(req.params(":subject_id"));
 
     Professor professor = Professor.findById(professorId);
