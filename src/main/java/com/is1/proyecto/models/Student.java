@@ -8,14 +8,12 @@ import org.javalite.activejdbc.annotations.BelongsTo; // Importa BelongsTo
 @BelongsTo(parent = User.class, foreignKeyName = "user_id")
 public class Student extends Model {
 
-    // --- Métodos de Conveniencia (Getters y Setters) ---
-
-    public String getFirstName() {
-        return getString("first_name");
+    public String getName() {
+        return getString("name");
     }
 
-    public void setFirstName(String firstName) {
-        set("first_name", firstName);
+    public void setName(String name) {
+        set("name", name);
     }
 
     public String getLastName() {
@@ -26,12 +24,12 @@ public class Student extends Model {
         set("last_name", lastName);
     }
 
-    public String getStudentIdNumber() {
-        return getString("student_id_number");
+    public Integer getStudentIdNumber() {
+        return getInteger("student_id");
     }
 
-    public void setStudentIdNumber(String studentIdNumber) {
-        set("student_id_number", studentIdNumber);
+    public void setStudentIdNumber(String student_id) {
+        set("student_id_number", student_id);
     }
 
     public String getCareerName() {
@@ -42,6 +40,16 @@ public class Student extends Model {
         set("career_name", careerName);
     }
 
+  
+    public Integer getYearOfEntry() {
+        return getInteger("year_of_entry");
+    }
+
+    public void setYearOfEntry(Integer year_of_entry) {
+        set("year_of_entry", year_of_entry);
+    }
+
+
     public Long getUserId() {
         return getLong("user_id");
     }
@@ -50,6 +58,10 @@ public class Student extends Model {
         set("user_id", userId);
     }
 
+    public User getUser(){
+        return(parent(User.class));
+    }
+    
     // --- Relaciones ---
     // ActiveJDBC manejará automáticamente la relación One-to-One con User.
     // Para acceder al User asociado:

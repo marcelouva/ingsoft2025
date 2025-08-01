@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.is1.proyecto.config.DBConfigSingleton;
+import com.is1.proyecto.models.Professor;
 import com.is1.proyecto.models.Student;
+import com.is1.proyecto.models.Subject;
 
 import com.is1.proyecto.models.User;
 
@@ -85,8 +87,19 @@ public class App {
             return new ModelAndView(model, "professor.mustache");
         }, new MustacheTemplateEngine());
 
-       
-       
+        get("/profe", (req, res) -> {
+            System.out.println(">> GET /");
+            Map<String, Object> model = new HashMap<>();
+            return new ModelAndView(model, "profe.mustache");
+        }, new MustacheTemplateEngine());
+
+
+        get("/dashboard", (req, res) -> {
+            System.out.println(">> GET /");
+            Map<String, Object> model = new HashMap<>();
+            return new ModelAndView(model, "dashboard.mustache");
+        }, new MustacheTemplateEngine());
+
        
         // ── POST /user/new : procesa alta de usuario ─────────────────────────
         post("/user/new", (req, res) -> {
@@ -95,6 +108,7 @@ public class App {
             Map<String, Object> model = new HashMap<>();
             String name     = req.queryParams("name");
             String password = req.queryParams("password");
+            String role = req.queryParams("role");
 
             // Validación de campos vacíos
             if (name == null || name.isEmpty() ||
@@ -112,6 +126,7 @@ public class App {
 
                 user.set("username", name);
                 user.set("password", hashedPassword);
+                user.set("role", role);
                 user.saveIt();
 
                 res.status(201);
@@ -135,6 +150,44 @@ public class App {
 
         // ________________________________________________________________________________
 
+
+    post("/professors", (req, res) -> {
+    // Extraer los valores de los campos del formulario usando su atributo 'name'
+        String name = req.queryParams("name");
+        String last_name = req.queryParams("last_name");
+        String email = req.queryParams("email");
+        String id_employee = req.queryParams("id_employee"); // Lo extraemos como String primero
+   
+        Map<String, Object> model = new HashMap<>();
+        //model.put("errorMessage", "Algún campo vacío.");
+        //model.put("returnUrl", "/user/new");
+        //        return new ModelAndView(model, "message.mustache");
+   
+        
+            try {
+                Professor profe = new Professor();
+
+                profe.set("name", name);
+                profe.set("last_name", last_name);
+                profe.set("email", email);
+                profe.set("id_employee", id_employee);
+
+                profe.set("user_id",req.session().attribute("userId"));
+                profe.saveIt();
+
+                res.status(201);
+                model.put("successMessage", "La cuenta fue creada exitosamente.");
+                model.put("returnUrl", "/dashboard");
+            } catch (Exception e) {
+                System.err.println("Error al registrar: " + e.getMessage());
+                res.status(500);
+                model.put("errorMessage", "Algo anduvo mal!!");
+                model.put("returnUrl", "/professors");
+            }
+
+            return new ModelAndView(model, "message.mustache");
+        }, new MustacheTemplateEngine());
+    
 
         // ── POST /login : procesa inicio de sesión ───────────────────────────
         post("/login", (req, res) -> {
@@ -168,15 +221,27 @@ public class App {
                 res.status(200);
                 req.session(true).attribute("currentUserUsername", username);
                 req.session().attribute("userId", user.getId());
+                req.session().attribute("role", user.getRole());
+
                 req.session().attribute("loggedIn", true);
  
                 model.put("successMessage", "Usuario logeado!!.");
-                res.redirect("/professor");
-            
-
-
-
-
+               
+                switch (user.getRole()) {
+                    case 1:
+                        if (user.getProfessor()==null){
+                            res.redirect("/professor");
+                        }else{
+                            res.redirect("/dashboard");
+                        }    
+                        break;
+                    case 2:
+                        res.redirect("/administrador");
+                        break;
+                    default:
+                        res.redirect("/profe");
+                        break;
+                }
 
             } else {
                 res.status(401);
@@ -185,6 +250,52 @@ public class App {
 
             return new ModelAndView(model, "message.mustache");
         }, new MustacheTemplateEngine());
+
+
+
+
+
+
+
+// El siguiente post asocia un profesor a una materia. 
+// curl -X POST http://localhost:8080/professors/1/subjects/2
+
+post("/professors/:professor_id/subjects/:subject_id", (req, res) -> {
+    // Abrir conexión si no está abierta
+    if (!Base.hasConnection()) Base.open("org.sqlite.JDBC", "jdbc:sqlite:db/database.db", "", "");
+
+    Long professorId = Long.valueOf(req.params(":professor_id"));
+    Long subjectId = Long.valueOf(req.params(":subject_id"));
+
+    Professor professor = Professor.findById(professorId);
+    Subject subject = Subject.findById(subjectId);
+
+    if (professor == null || subject == null) {
+        res.status(404);
+        return "Profesor o materia no encontrada.";
+    }
+
+    // Verificar si ya están asociados
+    if (!professor.getSubjects().contains(subject)) {
+        professor.add(subject);  // Relación N:N
+        res.status(201);
+        return "Profesor asignado a la materia correctamente.";
+    } else {
+        res.status(200);
+        return "El profesor ya está asignado a esta materia.";
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
     }
 }
 

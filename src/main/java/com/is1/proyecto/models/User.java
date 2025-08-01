@@ -17,6 +17,14 @@ public class User extends Model {
         return getString("username");
     }
 
+    public Integer getRole() {
+        return getInteger("role");
+    }
+
+ public void setRole(Integer role) {
+        set("role", role);
+    }
+
     public void setUsername(String username) {
         set("username", username);
     }
