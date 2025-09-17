@@ -119,7 +119,7 @@ java -jar target/proye-is-1.0-SNAPSHOT.jar
 
 ---
 
-# 📘 Guía: Cómo agregar una nueva entidad al modelo (ejemplo: `Student`)
+# Guía: Cómo agregar una nueva entidad al modelo (ejemplo: `Student`)
 
 En este proyecto trabajamos con **Java + ActiveJDBC + SQLite**.  
 Cada vez que agregamos una nueva entidad al modelo, necesitamos reflejar el cambio **tanto en la base de datos como en el código Java**.  
