@@ -1,4 +1,4 @@
-# Instructivo de uso del proyecto `ingsoft2025`
+# Instructivo Ejercicio Transversal Integrador  `ingsoft2025`
 
 Este documento explica paso a paso cómo utilizar el proyecto de la asignatura de **Ingeniería de Software**.  
 El proyecto está desarrollado en **Java**, y utiliza **Spark** (framework web), **Mustache** (motor de plantillas), **SQLite** (base de datos) y **ActiveJDBC** (ORM).  
@@ -51,7 +51,7 @@ Antes de comenzar, asegurate de tener instalado:
   - SLF4J 1.7.36 para logging  
   - JUnit 4.13.2 y JUnit Jupiter 5.10.0 para testing  
 
-> 💡 No hace falta instalar estas librerías manualmente: Maven las descargará al momento de compilar.
+> No hace falta instalar estas librerías manualmente: Maven las descargará al momento de compilar.
 
 ---
 
@@ -60,7 +60,7 @@ Antes de comenzar, asegurate de tener instalado:
 Cada eequipo  debe crear su propia copia del repositorio para trabajar de forma independiente:
 
 1. Ir al repositorio original:  
-   👉 [https://github.com/marcelouva/ingsoft2025](https://github.com/marcelouva/ingsoft2025)  
+    [https://github.com/marcelouva/ingsoft2025](https://github.com/marcelouva/ingsoft2025)  
 2. Hacer clic en el botón **Fork** (arriba a la derecha).  
 3. Seleccionar la cuenta personal de GitHub.  
 
@@ -70,7 +70,7 @@ Esto generará un fork en:
 https://github.com/TU_USUARIO/ingsoft2025
 ```
 
-> 💡 El fork permite trabajar sin modificar directamente el proyecto original.
+> El fork permite trabajar sin modificar directamente el proyecto original.
 
 ---
 
@@ -273,12 +273,12 @@ student.add(user);      // o user.add(student);
 
 ---
 
-## 6. Checklist rápido ✅
+## 6. Checklist 
 
-- [ ] Agregar definición de la tabla en `schema.sql` (en plural).  
-- [ ] Ejecutar `sqlite3 db/dev.db < schema.sql` para aplicar cambios.  
-- [ ] Crear la clase `Student` en `models/` (en singular).  
-- [ ] Definir relaciones entre los modelos correspondientes.  
+- Agregar definición de la tabla en `schema.sql` (en plural).  
+- Ejecutar `sqlite3 db/dev.db < schema.sql` para aplicar cambios.  
+- Crear la clase `Student` en `models/` (en singular).  
+- Definir relaciones entre los modelos correspondientes.  
 
 ---
 
@@ -291,7 +291,7 @@ student.add(user);      // o user.add(student);
 
 ---
 
-# 📑 Uso de Mustache en las vistas
+# Uso de Mustache en las vistas
 
 El proyecto utiliza **Mustache** como motor de plantillas para las vistas.  
 Esto permite separar la lógica de negocio (Java) de la presentación (HTML).  
